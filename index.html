@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histoires Anonymes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .story-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .story-card:hover {
+            border-left-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+        .comment-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .comment-section.open {
+            max-height: 600px;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .like-animation {
+            animation: likeScale 0.3s ease;
+        }
+        @keyframes likeScale {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        .notification.show {
+            transform: translateX(0);
+        }
+        .search-highlight {
+            background-color: #fef3c7;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+        
+        /* Text wrapping and overflow prevention */
+        .text-wrap {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+            max-width: 100%;
+        }
+        
+        .story-title {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            line-height: 1.3;
+        }
+        
+        .story-content {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        
+        .comment-text {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            white-space: pre-wrap;
+            line-height: 1.4;
+        }
+        
+        /* Prevent horizontal overflow */
+        * {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .container {
+            overflow-x: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen">
+    <!-- Notification -->
+    <div id="notification" class="notification bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
+        <span id="notificationText"></span>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="text-center">
+                <div class="text-4xl mb-4">🗑️</div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">Supprimer cette histoire ?</h3>
+                <p class="text-gray-600 mb-6">Cette action est irréversible. L'histoire et tous ses commentaires seront définitivement supprimés.</p>
+                <div class="flex space-x-3">
+                    <button id="cancelDelete" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition duration-200">
+                        Annuler
+                    </button>
+                    <button id="confirmDelete" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
+                        Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">📖 Histoires Anonymes</h1>
+            <p class="text-gray-600 text-lg">Partagez vos histoires en toute anonymité</p>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="mb-8">
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="Rechercher dans les histoires..." 
+                       class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <div class="absolute left-4 top-3.5 text-gray-400">
+                    🔍
+                </div>
+            </div>
+        </div>
+
+        <!-- Story Form -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">✍️ Partager votre histoire</h2>
+            <form id="storyForm">
+                <div class="mb-4">
+                    <input type="text" id="storyTitle" placeholder="Titre de votre histoire..." 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-wrap" required>
+                </div>
+                <div class="mb-4">
+                    <textarea id="storyContent" placeholder="Racontez votre histoire..." rows="4"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-wrap" required></textarea>
+                </div>
+                <div class="mb-4">
+                    <select id="storyCategory" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="vie">💫 Vie quotidienne</option>
+                        <option value="amour">❤️ Amour</option>
+                        <option value="travail">💼 Travail</option>
+                        <option value="famille">👨‍👩‍👧‍👦 Famille</option>
+                        <option value="voyage">✈️ Voyage</option>
+                        <option value="autre">🌟 Autre</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition duration-200">
+                    Publier l'histoire
+                </button>
+            </form>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="flex flex-wrap gap-2 mb-6">
+            <button class="filter-btn active bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium transition duration-200" data-category="all">
+                Toutes
+            </button>
+            <button class="filter-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm font-medium transition duration-200" data-category="vie">
+                💫 Vie quotidienne
+            </button>
+            <button class="filter-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm font-medium transition duration-200" data-category="amour">
+                ❤️ Amour
+            </button>
+            <button class="filter-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm font-medium transition duration-200" data-category="travail">
+                💼 Travail
+            </button>
+            <button class="filter-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm font-medium transition duration-200" data-category="famille">
+                👨‍👩‍👧‍👦 Famille
+            </button>
+            <button class="filter-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm font-medium transition duration-200" data-category="voyage">
+                ✈️ Voyage
+            </button>
+            <button class="filter-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm font-medium transition duration-200" data-category="autre">
+                🌟 Autre
+            </button>
+        </div>
+
+        <!-- Stories Container -->
+        <div id="storiesContainer">
+            <!-- Sample stories will be loaded here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-12 hidden">
+            <div class="text-6xl mb-4">📚</div>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">Aucune histoire trouvée</h3>
+            <p class="text-gray-500">Essayez de modifier vos critères de recherche ou soyez le premier à partager une histoire !</p>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        let stories = [
+            {
+                id: 1,
+                title: "Ma première journée de télétravail",
+                content: "Aujourd'hui était ma première journée de télétravail. J'étais nerveux mais excité à la fois. J'ai découvert que travailler depuis chez moi me permettait d'être plus productif et de mieux équilibrer ma vie professionnelle et personnelle. Mon chat a même participé à une réunion vidéo !",
+                category: "travail",
+                likes: 15,
+                timestamp: new Date('2024-01-15T10:30:00'),
+                comments: [
+                    { id: 1, content: "Félicitations ! Le télétravail peut vraiment changer la vie.", timestamp: new Date('2024-01-15T11:00:00') },
+                    { id: 2, content: "Haha, les animaux de compagnie adorent les réunions vidéo ! 😸", timestamp: new Date('2024-01-15T11:15:00') }
+                ]
+            },
+            {
+                id: 2,
+                title: "Rencontre inattendue dans le métro",
+                content: "Ce matin dans le métro, j'ai aidé une personne âgée à porter ses courses. Elle m'a raconté des histoires fascinantes de sa jeunesse à Paris dans les années 60. Parfois, les plus belles rencontres arrivent quand on s'y attend le moins.",
+                category: "vie",
+                likes: 23,
+                timestamp: new Date('2024-01-14T08:45:00'),
+                comments: [
+                    { id: 3, content: "Quelle belle histoire ! Ces moments spontanés sont précieux.", timestamp: new Date('2024-01-14T09:00:00') }
+                ]
+            },
+            {
+                id: 3,
+                title: "Mon voyage solo en Islande",
+                content: "J'ai enfin osé partir seul en voyage en Islande. Les paysages étaient à couper le souffle, et j'ai appris tellement sur moi-même. Voir les aurores boréales pour la première fois m'a fait pleurer de joie. Parfois, il faut sortir de sa zone de confort pour découvrir qui on est vraiment.",
+                category: "voyage",
+                likes: 31,
+                timestamp: new Date('2024-01-13T19:20:00'),
+                comments: []
+            }
+        ];
+
+        let currentStoryToDelete = null;
+
+        // DOM elements
+        const storyForm = document.getElementById('storyForm');
+        const storiesContainer = document.getElementById('storiesContainer');
+        const searchInput = document.getElementById('searchInput');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notificationText');
+        const deleteModal = document.getElementById('deleteModal');
+        const cancelDelete = document.getElementById('cancelDelete');
+        const confirmDelete = document.getElementById('confirmDelete');
+        const emptyState = document.getElementById('emptyState');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderStories();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            storyForm.addEventListener('submit', handleStorySubmit);
+            searchInput.addEventListener('input', handleSearch);
+            
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', handleFilter);
+            });
+
+            cancelDelete.addEventListener('click', hideDeleteModal);
+            confirmDelete.addEventListener('click', handleDeleteConfirm);
+            
+            // Close modal on overlay click
+            deleteModal.addEventListener('click', function(e) {
+                if (e.target === deleteModal) {
+                    hideDeleteModal();
+                }
+            });
+        }
+
+        function handleStorySubmit(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('storyTitle').value.trim();
+            const content = document.getElementById('storyContent').value.trim();
+            const category = document.getElementById('storyCategory').value;
+
+            if (!title || !content) return;
+
+            const newStory = {
+                id: Date.now(),
+                title,
+                content,
+                category,
+                likes: 0,
+                timestamp: new Date(),
+                comments: []
+            };
+
+            stories.unshift(newStory);
+            renderStories();
+            storyForm.reset();
+            showNotification('Histoire publiée avec succès ! 🎉');
+        }
+
+        function renderStories(filteredStories = null) {
+            const storiesToRender = filteredStories || stories;
+            
+            if (storiesToRender.length === 0) {
+                storiesContainer.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            
+            storiesContainer.innerHTML = storiesToRender.map(story => `
+                <div class="story-card bg-white rounded-xl shadow-lg p-6 mb-6 fade-in" data-story-id="${story.id}">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-sm font-medium px-3 py-1 rounded-full ${getCategoryStyle(story.category)}">
+                                    ${getCategoryIcon(story.category)} ${getCategoryName(story.category)}
+                                </span>
+                                <span class="text-gray-500 text-sm">${formatTime(story.timestamp)}</span>
+                            </div>
+                            <h3 class="story-title text-xl font-semibold text-gray-800 mb-2">${story.title}</h3>
+                        </div>
+                        <button class="delete-btn text-gray-400 hover:text-red-500 transition duration-200 p-1" data-story-id="${story.id}">
+                            🗑️
+                        </button>
+                    </div>
+                    
+                    <p class="story-content text-gray-700 leading-relaxed mb-4">${story.content}</p>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <button class="like-btn flex items-center space-x-2 text-gray-600 hover:text-red-500 transition duration-200" data-story-id="${story.id}">
+                                <span class="text-lg">❤️</span>
+                                <span class="like-count">${story.likes}</span>
+                            </button>
+                            <button class="comment-btn flex items-center space-x-2 text-gray-600 hover:text-blue-500 transition duration-200" data-story-id="${story.id}">
+                                <span class="text-lg">💬</span>
+                                <span>${story.comments.length}</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="comment-section mt-4" data-story-id="${story.id}">
+                        <div class="border-t pt-4">
+                            <div class="comments-list mb-4">
+                                ${story.comments.map(comment => `
+                                    <div class="bg-gray-50 rounded-lg p-3 mb-2">
+                                        <p class="comment-text text-gray-700 text-sm">${comment.content}</p>
+                                        <span class="text-gray-500 text-xs">${formatTime(comment.timestamp)}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="flex space-x-2">
+                                <input type="text" class="comment-input text-wrap flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                                       placeholder="Ajouter un commentaire..." data-story-id="${story.id}">
+                                <button class="add-comment-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition duration-200" data-story-id="${story.id}">
+                                    Envoyer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Add event listeners for new elements
+            addStoryEventListeners();
+        }
+
+        function addStoryEventListeners() {
+            // Like buttons
+            document.querySelectorAll('.like-btn').forEach(btn => {
+                btn.addEventListener('click', handleLike);
+            });
+
+            // Comment buttons
+            document.querySelectorAll('.comment-btn').forEach(btn => {
+                btn.addEventListener('click', toggleComments);
+            });
+
+            // Add comment buttons
+            document.querySelectorAll('.add-comment-btn').forEach(btn => {
+                btn.addEventListener('click', handleAddComment);
+            });
+
+            // Comment inputs (Enter key)
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        handleAddComment.call(this, e);
+                    }
+                });
+            });
+
+            // Delete buttons
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', handleDelete);
+            });
+        }
+
+        function handleLike(e) {
+            const storyId = parseInt(e.currentTarget.dataset.storyId);
+            const story = stories.find(s => s.id === storyId);
+            
+            if (story) {
+                story.likes++;
+                const likeCount = e.currentTarget.querySelector('.like-count');
+                likeCount.textContent = story.likes;
+                
+                // Add animation
+                e.currentTarget.classList.add('like-animation');
+                setTimeout(() => {
+                    e.currentTarget.classList.remove('like-animation');
+                }, 300);
+            }
+        }
+
+        function toggleComments(e) {
+            const storyId = e.currentTarget.dataset.storyId;
+            const commentSection = document.querySelector(`.comment-section[data-story-id="${storyId}"]`);
+            commentSection.classList.toggle('open');
+        }
+
+        function handleAddComment(e) {
+            const storyId = parseInt(e.currentTarget.dataset.storyId);
+            const input = document.querySelector(`.comment-input[data-story-id="${storyId}"]`);
+            const content = input.value.trim();
+            
+            if (!content) return;
+            
+            const story = stories.find(s => s.id === storyId);
+            if (story) {
+                const newComment = {
+                    id: Date.now(),
+                    content,
+                    timestamp: new Date()
+                };
+                
+                story.comments.push(newComment);
+                input.value = '';
+                renderStories();
+                showNotification('Commentaire ajouté ! 💬');
+            }
+        }
+
+        function handleDelete(e) {
+            e.stopPropagation();
+            currentStoryToDelete = parseInt(e.currentTarget.dataset.storyId);
+            showDeleteModal();
+        }
+
+        function showDeleteModal() {
+            deleteModal.classList.add('show');
+        }
+
+        function hideDeleteModal() {
+            deleteModal.classList.remove('show');
+            currentStoryToDelete = null;
+        }
+
+        function handleDeleteConfirm() {
+            if (currentStoryToDelete) {
+                stories = stories.filter(story => story.id !== currentStoryToDelete);
+                renderStories();
+                hideDeleteModal();
+                showNotification('Histoire supprimée 🗑️');
+            }
+        }
+
+        function handleSearch(e) {
+            const query = e.target.value.toLowerCase().trim();
+            
+            if (!query) {
+                renderStories();
+                return;
+            }
+            
+            const filteredStories = stories.filter(story => 
+                story.title.toLowerCase().includes(query) || 
+                story.content.toLowerCase().includes(query)
+            );
+            
+            renderStories(filteredStories);
+        }
+
+        function handleFilter(e) {
+            const category = e.target.dataset.category;
+            
+            // Update active button
+            filterBtns.forEach(btn => {
+                btn.classList.remove('active', 'bg-blue-600', 'text-white');
+                btn.classList.add('bg-gray-200', 'hover:bg-gray-300', 'text-gray-700');
+            });
+            
+            e.target.classList.add('active', 'bg-blue-600', 'text-white');
+            e.target.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'text-gray-700');
+            
+            // Filter stories
+            if (category === 'all') {
+                renderStories();
+            } else {
+                const filteredStories = stories.filter(story => story.category === category);
+                renderStories(filteredStories);
+            }
+        }
+
+        function showNotification(message) {
+            notificationText.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function getCategoryStyle(category) {
+            const styles = {
+                vie: 'bg-purple-100 text-purple-800',
+                amour: 'bg-red-100 text-red-800',
+                travail: 'bg-blue-100 text-blue-800',
+                famille: 'bg-green-100 text-green-800',
+                voyage: 'bg-yellow-100 text-yellow-800',
+                autre: 'bg-gray-100 text-gray-800'
+            };
+            return styles[category] || styles.autre;
+        }
+
+        function getCategoryIcon(category) {
+            const icons = {
+                vie: '💫',
+                amour: '❤️',
+                travail: '💼',
+                famille: '👨‍👩‍👧‍👦',
+                voyage: '✈️',
+                autre: '🌟'
+            };
+            return icons[category] || icons.autre;
+        }
+
+        function getCategoryName(category) {
+            const names = {
+                vie: 'Vie quotidienne',
+                amour: 'Amour',
+                travail: 'Travail',
+                famille: 'Famille',
+                voyage: 'Voyage',
+                autre: 'Autre'
+            };
+            return names[category] || names.autre;
+        }
+
+        function formatTime(timestamp) {
+            const now = new Date();
+            const diff = now - timestamp;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (minutes < 1) return 'À l\'instant';
+            if (minutes < 60) return `Il y a ${minutes} min`;
+            if (hours < 24) return `Il y a ${hours}h`;
+            if (days < 7) return `Il y a ${days} jour${days > 1 ? 's' : ''}`;
+            
+            return timestamp.toLocaleDateString('fr-FR');
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'962add05d174c7a3',t:'MTc1MzEwMjYzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
