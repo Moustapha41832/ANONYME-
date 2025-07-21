@@ -89,7 +89,6 @@
             transform: scale(1);
         }
         
-        /* Text wrapping and overflow prevention */
         .text-wrap {
             word-wrap: break-word;
             overflow-wrap: break-word;
@@ -121,7 +120,6 @@
             line-height: 1.4;
         }
         
-        /* Prevent horizontal overflow */
         * {
             max-width: 100%;
             box-sizing: border-box;
@@ -130,426 +128,189 @@
         .container {
             overflow-x: hidden;
         }
+
+        .admin-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 999;
+        }
+
+        .delete-btn {
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen">
     <!-- Notification -->
     <div id="notification" class="notification bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
-        <span id="notificationText"></span>
+        <span id="notificationText">Message publié avec succès!</span>
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-panel">
+        <button id="adminToggle" class="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full shadow-lg transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="text-xl font-semibold mb-4">Accès Administrateur</h3>
+            <input type="password" id="adminPassword" placeholder="Mot de passe" class="w-full p-3 border border-gray-300 rounded-lg mb-4">
+            <div class="flex gap-3">
+                <button id="adminLogin" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition-colors">
+                    Se connecter
+                </button>
+                <button id="adminCancel" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg transition-colors">
+                    Annuler
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="modal-overlay">
         <div class="modal-content">
-            <div class="text-center">
-                <div class="text-4xl mb-4">🗑️</div>
-                <h3 class="text-xl font-semibold text-gray-800 mb-2">Supprimer cette histoire ?</h3>
-                <p class="text-gray-600 mb-6">Cette action est irréversible. L'histoire et tous ses commentaires seront définitivement supprimés.</p>
-                <div class="flex space-x-3">
-                    <button id="cancelDelete" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition duration-200">
-                        Annuler
-                    </button>
-                    <button id="confirmDelete" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
-                        Supprimer
-                    </button>
-                </div>
+            <h3 class="text-xl font-semibold mb-4">Confirmer la suppression</h3>
+            <p class="text-gray-600 mb-6">Êtes-vous sûr de vouloir supprimer cette histoire? Cette action est irréversible.</p>
+            <div class="flex gap-3">
+                <button id="confirmDelete" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition-colors">
+                    Supprimer
+                </button>
+                <button id="cancelDelete" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg transition-colors">
+                    Annuler
+                </button>
             </div>
         </div>
     </div>
 
     <div class="container mx-auto px-4 py-8 max-w-4xl">
         <!-- Header -->
-        <header class="text-center mb-12">
+        <div class="text-center mb-12">
             <h1 class="text-4xl font-bold text-gray-800 mb-4">📖 Histoires Anonymes</h1>
             <p class="text-gray-600 text-lg">Partagez vos histoires en toute anonymité</p>
-        </header>
+        </div>
 
         <!-- Search Bar -->
         <div class="mb-8">
             <div class="relative">
                 <input type="text" id="searchInput" placeholder="Rechercher dans les histoires..." 
-                       class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <div class="absolute left-4 top-3.5 text-gray-400">
-                    🔍
-                </div>
+                       class="w-full p-4 pl-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <svg class="absolute left-4 top-4 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
             </div>
         </div>
 
         <!-- Story Form -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4">✍️ Partager votre histoire</h2>
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">✍️ Partager votre histoire</h2>
             <form id="storyForm">
-                <div class="mb-4">
+                <div class="mb-6">
                     <input type="text" id="storyTitle" placeholder="Titre de votre histoire..." 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-wrap" required>
+                           class="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-wrap" required>
                 </div>
-                <div class="mb-4">
-                    <textarea id="storyContent" placeholder="Racontez votre histoire..." rows="4"
-                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-wrap" required></textarea>
+                <div class="mb-6">
+                    <textarea id="storyContent" placeholder="Racontez votre histoire..." rows="6"
+                              class="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-wrap" required></textarea>
                 </div>
-                <div class="mb-4">
-                    <select id="storyCategory" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="vie">💫 Vie quotidienne</option>
-                        <option value="amour">❤️ Amour</option>
+                <div class="mb-6">
+                    <select id="storyCategory" class="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Choisir une catégorie</option>
+                        <option value="amour">💕 Amour</option>
                         <option value="travail">💼 Travail</option>
                         <option value="famille">👨‍👩‍👧‍👦 Famille</option>
+                        <option value="amitie">👫 Amitié</option>
                         <option value="voyage">✈️ Voyage</option>
                         <option value="autre">🌟 Autre</option>
                     </select>
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition duration-200">
-                    Publier l'histoire
+                <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105">
+                    📝 Publier anonymement
                 </button>
             </form>
         </div>
 
         <!-- Filter Buttons -->
-        <div class="flex flex-wrap gap-2 mb-6">
-            <button class="filter-btn active bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium transition duration-200" data-category="all">
+        <div class="flex flex-wrap gap-3 mb-8 justify-center">
+            <button class="filter-btn active bg-blue-600 text-white px-6 py-3 rounded-full font-medium transition-all hover:bg-blue-700" data-category="all">
                 Toutes
             </button>
-            <button class="filter-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm font-medium transition duration-200" data-category="vie">
-                💫 Vie quotidienne
+            <button class="filter-btn bg-white text-gray-700 px-6 py-3 rounded-full font-medium transition-all hover:bg-gray-100" data-category="amour">
+                💕 Amour
             </button>
-            <button class="filter-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm font-medium transition duration-200" data-category="amour">
-                ❤️ Amour
-            </button>
-            <button class="filter-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm font-medium transition duration-200" data-category="travail">
+            <button class="filter-btn bg-white text-gray-700 px-6 py-3 rounded-full font-medium transition-all hover:bg-gray-100" data-category="travail">
                 💼 Travail
             </button>
-            <button class="filter-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm font-medium transition duration-200" data-category="famille">
+            <button class="filter-btn bg-white text-gray-700 px-6 py-3 rounded-full font-medium transition-all hover:bg-gray-100" data-category="famille">
                 👨‍👩‍👧‍👦 Famille
             </button>
-            <button class="filter-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm font-medium transition duration-200" data-category="voyage">
+            <button class="filter-btn bg-white text-gray-700 px-6 py-3 rounded-full font-medium transition-all hover:bg-gray-100" data-category="amitie">
+                👫 Amitié
+            </button>
+            <button class="filter-btn bg-white text-gray-700 px-6 py-3 rounded-full font-medium transition-all hover:bg-gray-100" data-category="voyage">
                 ✈️ Voyage
             </button>
-            <button class="filter-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm font-medium transition duration-200" data-category="autre">
+            <button class="filter-btn bg-white text-gray-700 px-6 py-3 rounded-full font-medium transition-all hover:bg-gray-100" data-category="autre">
                 🌟 Autre
             </button>
         </div>
 
         <!-- Stories Container -->
-        <div id="storiesContainer">
-            <!-- Sample stories will be loaded here -->
+        <div id="storiesContainer" class="space-y-6">
+            <!-- Stories will be dynamically added here -->
         </div>
 
-        <!-- Empty State -->
-        <div id="emptyState" class="text-center py-12 hidden">
+        <!-- No stories message -->
+        <div id="noStoriesMessage" class="text-center py-12 hidden">
             <div class="text-6xl mb-4">📚</div>
             <h3 class="text-xl font-semibold text-gray-600 mb-2">Aucune histoire trouvée</h3>
-            <p class="text-gray-500">Essayez de modifier vos critères de recherche ou soyez le premier à partager une histoire !</p>
+            <p class="text-gray-500">Soyez le premier à partager votre histoire!</p>
         </div>
     </div>
 
     <script>
-        // Sample data
-        let stories = [
-            {
-                id: 1,
-                title: "Ma première journée de télétravail",
-                content: "Aujourd'hui était ma première journée de télétravail. J'étais nerveux mais excité à la fois. J'ai découvert que travailler depuis chez moi me permettait d'être plus productif et de mieux équilibrer ma vie professionnelle et personnelle. Mon chat a même participé à une réunion vidéo !",
-                category: "travail",
-                likes: 15,
-                timestamp: new Date('2024-01-15T10:30:00'),
-                comments: [
-                    { id: 1, content: "Félicitations ! Le télétravail peut vraiment changer la vie.", timestamp: new Date('2024-01-15T11:00:00') },
-                    { id: 2, content: "Haha, les animaux de compagnie adorent les réunions vidéo ! 😸", timestamp: new Date('2024-01-15T11:15:00') }
-                ]
-            },
-            {
-                id: 2,
-                title: "Rencontre inattendue dans le métro",
-                content: "Ce matin dans le métro, j'ai aidé une personne âgée à porter ses courses. Elle m'a raconté des histoires fascinantes de sa jeunesse à Paris dans les années 60. Parfois, les plus belles rencontres arrivent quand on s'y attend le moins.",
-                category: "vie",
-                likes: 23,
-                timestamp: new Date('2024-01-14T08:45:00'),
-                comments: [
-                    { id: 3, content: "Quelle belle histoire ! Ces moments spontanés sont précieux.", timestamp: new Date('2024-01-14T09:00:00') }
-                ]
-            },
-            {
-                id: 3,
-                title: "Mon voyage solo en Islande",
-                content: "J'ai enfin osé partir seul en voyage en Islande. Les paysages étaient à couper le souffle, et j'ai appris tellement sur moi-même. Voir les aurores boréales pour la première fois m'a fait pleurer de joie. Parfois, il faut sortir de sa zone de confort pour découvrir qui on est vraiment.",
-                category: "voyage",
-                likes: 31,
-                timestamp: new Date('2024-01-13T19:20:00'),
-                comments: []
+        // Configuration
+        const ADMIN_PASSWORD = "admin123"; // Changez ce mot de passe!
+        let isAdminMode = false;
+        let stories = JSON.parse(localStorage.getItem('anonymousStories')) || [];
+        let currentFilter = 'all';
+        let searchTerm = '';
+        let storyToDelete = null;
+
+        // Utility functions
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        function generateUserToken() {
+            let token = localStorage.getItem('userToken');
+            if (!token) {
+                token = generateId();
+                localStorage.setItem('userToken', token);
             }
-        ];
-
-        let currentStoryToDelete = null;
-
-        // DOM elements
-        const storyForm = document.getElementById('storyForm');
-        const storiesContainer = document.getElementById('storiesContainer');
-        const searchInput = document.getElementById('searchInput');
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const notification = document.getElementById('notification');
-        const notificationText = document.getElementById('notificationText');
-        const deleteModal = document.getElementById('deleteModal');
-        const cancelDelete = document.getElementById('cancelDelete');
-        const confirmDelete = document.getElementById('confirmDelete');
-        const emptyState = document.getElementById('emptyState');
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            renderStories();
-            setupEventListeners();
-        });
-
-        function setupEventListeners() {
-            storyForm.addEventListener('submit', handleStorySubmit);
-            searchInput.addEventListener('input', handleSearch);
-            
-            filterBtns.forEach(btn => {
-                btn.addEventListener('click', handleFilter);
-            });
-
-            cancelDelete.addEventListener('click', hideDeleteModal);
-            confirmDelete.addEventListener('click', handleDeleteConfirm);
-            
-            // Close modal on overlay click
-            deleteModal.addEventListener('click', function(e) {
-                if (e.target === deleteModal) {
-                    hideDeleteModal();
-                }
-            });
+            return token;
         }
 
-        function handleStorySubmit(e) {
-            e.preventDefault();
-            
-            const title = document.getElementById('storyTitle').value.trim();
-            const content = document.getElementById('storyContent').value.trim();
-            const category = document.getElementById('storyCategory').value;
-
-            if (!title || !content) return;
-
-            const newStory = {
-                id: Date.now(),
-                title,
-                content,
-                category,
-                likes: 0,
-                timestamp: new Date(),
-                comments: []
-            };
-
-            stories.unshift(newStory);
-            renderStories();
-            storyForm.reset();
-            showNotification('Histoire publiée avec succès ! 🎉');
+        function saveStories() {
+            localStorage.setItem('anonymousStories', JSON.stringify(stories));
         }
 
-        function renderStories(filteredStories = null) {
-            const storiesToRender = filteredStories || stories;
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
             
-            if (storiesToRender.length === 0) {
-                storiesContainer.innerHTML = '';
-                emptyState.classList.remove('hidden');
-                return;
-            }
-
-            emptyState.classList.add('hidden');
-            
-            storiesContainer.innerHTML = storiesToRender.map(story => `
-                <div class="story-card bg-white rounded-xl shadow-lg p-6 mb-6 fade-in" data-story-id="${story.id}">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-sm font-medium px-3 py-1 rounded-full ${getCategoryStyle(story.category)}">
-                                    ${getCategoryIcon(story.category)} ${getCategoryName(story.category)}
-                                </span>
-                                <span class="text-gray-500 text-sm">${formatTime(story.timestamp)}</span>
-                            </div>
-                            <h3 class="story-title text-xl font-semibold text-gray-800 mb-2">${story.title}</h3>
-                        </div>
-                        <button class="delete-btn text-gray-400 hover:text-red-500 transition duration-200 p-1" data-story-id="${story.id}">
-                            🗑️
-                        </button>
-                    </div>
-                    
-                    <p class="story-content text-gray-700 leading-relaxed mb-4">${story.content}</p>
-                    
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <button class="like-btn flex items-center space-x-2 text-gray-600 hover:text-red-500 transition duration-200" data-story-id="${story.id}">
-                                <span class="text-lg">❤️</span>
-                                <span class="like-count">${story.likes}</span>
-                            </button>
-                            <button class="comment-btn flex items-center space-x-2 text-gray-600 hover:text-blue-500 transition duration-200" data-story-id="${story.id}">
-                                <span class="text-lg">💬</span>
-                                <span>${story.comments.length}</span>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="comment-section mt-4" data-story-id="${story.id}">
-                        <div class="border-t pt-4">
-                            <div class="comments-list mb-4">
-                                ${story.comments.map(comment => `
-                                    <div class="bg-gray-50 rounded-lg p-3 mb-2">
-                                        <p class="comment-text text-gray-700 text-sm">${comment.content}</p>
-                                        <span class="text-gray-500 text-xs">${formatTime(comment.timestamp)}</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                            <div class="flex space-x-2">
-                                <input type="text" class="comment-input text-wrap flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                       placeholder="Ajouter un commentaire..." data-story-id="${story.id}">
-                                <button class="add-comment-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition duration-200" data-story-id="${story.id}">
-                                    Envoyer
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-
-            // Add event listeners for new elements
-            addStoryEventListeners();
-        }
-
-        function addStoryEventListeners() {
-            // Like buttons
-            document.querySelectorAll('.like-btn').forEach(btn => {
-                btn.addEventListener('click', handleLike);
-            });
-
-            // Comment buttons
-            document.querySelectorAll('.comment-btn').forEach(btn => {
-                btn.addEventListener('click', toggleComments);
-            });
-
-            // Add comment buttons
-            document.querySelectorAll('.add-comment-btn').forEach(btn => {
-                btn.addEventListener('click', handleAddComment);
-            });
-
-            // Comment inputs (Enter key)
-            document.querySelectorAll('.comment-input').forEach(input => {
-                input.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        handleAddComment.call(this, e);
-                    }
-                });
-            });
-
-            // Delete buttons
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', handleDelete);
-            });
-        }
-
-        function handleLike(e) {
-            const storyId = parseInt(e.currentTarget.dataset.storyId);
-            const story = stories.find(s => s.id === storyId);
-            
-            if (story) {
-                story.likes++;
-                const likeCount = e.currentTarget.querySelector('.like-count');
-                likeCount.textContent = story.likes;
-                
-                // Add animation
-                e.currentTarget.classList.add('like-animation');
-                setTimeout(() => {
-                    e.currentTarget.classList.remove('like-animation');
-                }, 300);
-            }
-        }
-
-        function toggleComments(e) {
-            const storyId = e.currentTarget.dataset.storyId;
-            const commentSection = document.querySelector(`.comment-section[data-story-id="${storyId}"]`);
-            commentSection.classList.toggle('open');
-        }
-
-        function handleAddComment(e) {
-            const storyId = parseInt(e.currentTarget.dataset.storyId);
-            const input = document.querySelector(`.comment-input[data-story-id="${storyId}"]`);
-            const content = input.value.trim();
-            
-            if (!content) return;
-            
-            const story = stories.find(s => s.id === storyId);
-            if (story) {
-                const newComment = {
-                    id: Date.now(),
-                    content,
-                    timestamp: new Date()
-                };
-                
-                story.comments.push(newComment);
-                input.value = '';
-                renderStories();
-                showNotification('Commentaire ajouté ! 💬');
-            }
-        }
-
-        function handleDelete(e) {
-            e.stopPropagation();
-            currentStoryToDelete = parseInt(e.currentTarget.dataset.storyId);
-            showDeleteModal();
-        }
-
-        function showDeleteModal() {
-            deleteModal.classList.add('show');
-        }
-
-        function hideDeleteModal() {
-            deleteModal.classList.remove('show');
-            currentStoryToDelete = null;
-        }
-
-        function handleDeleteConfirm() {
-            if (currentStoryToDelete) {
-                stories = stories.filter(story => story.id !== currentStoryToDelete);
-                renderStories();
-                hideDeleteModal();
-                showNotification('Histoire supprimée 🗑️');
-            }
-        }
-
-        function handleSearch(e) {
-            const query = e.target.value.toLowerCase().trim();
-            
-            if (!query) {
-                renderStories();
-                return;
-            }
-            
-            const filteredStories = stories.filter(story => 
-                story.title.toLowerCase().includes(query) || 
-                story.content.toLowerCase().includes(query)
-            );
-            
-            renderStories(filteredStories);
-        }
-
-        function handleFilter(e) {
-            const category = e.target.dataset.category;
-            
-            // Update active button
-            filterBtns.forEach(btn => {
-                btn.classList.remove('active', 'bg-blue-600', 'text-white');
-                btn.classList.add('bg-gray-200', 'hover:bg-gray-300', 'text-gray-700');
-            });
-            
-            e.target.classList.add('active', 'bg-blue-600', 'text-white');
-            e.target.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'text-gray-700');
-            
-            // Filter stories
-            if (category === 'all') {
-                renderStories();
-            } else {
-                const filteredStories = stories.filter(story => story.category === category);
-                renderStories(filteredStories);
-            }
-        }
-
-        function showNotification(message) {
             notificationText.textContent = message;
+            notification.className = `notification px-6 py-3 rounded-lg shadow-lg ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`;
             notification.classList.add('show');
             
             setTimeout(() => {
@@ -557,56 +318,360 @@
             }, 3000);
         }
 
-        function getCategoryStyle(category) {
-            const styles = {
-                vie: 'bg-purple-100 text-purple-800',
-                amour: 'bg-red-100 text-red-800',
-                travail: 'bg-blue-100 text-blue-800',
-                famille: 'bg-green-100 text-green-800',
-                voyage: 'bg-yellow-100 text-yellow-800',
-                autre: 'bg-gray-100 text-gray-800'
-            };
-            return styles[category] || styles.autre;
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
         }
 
-        function getCategoryIcon(category) {
-            const icons = {
-                vie: '💫',
-                amour: '❤️',
-                travail: '💼',
-                famille: '👨‍👩‍👧‍👦',
-                voyage: '✈️',
-                autre: '🌟'
-            };
-            return icons[category] || icons.autre;
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
         }
 
-        function getCategoryName(category) {
-            const names = {
-                vie: 'Vie quotidienne',
-                amour: 'Amour',
-                travail: 'Travail',
-                famille: 'Famille',
-                voyage: 'Voyage',
-                autre: 'Autre'
-            };
-            return names[category] || names.autre;
-        }
-
-        function formatTime(timestamp) {
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
             const now = new Date();
-            const diff = now - timestamp;
-            const minutes = Math.floor(diff / 60000);
-            const hours = Math.floor(diff / 3600000);
-            const days = Math.floor(diff / 86400000);
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             
-            if (minutes < 1) return 'À l\'instant';
-            if (minutes < 60) return `Il y a ${minutes} min`;
-            if (hours < 24) return `Il y a ${hours}h`;
-            if (days < 7) return `Il y a ${days} jour${days > 1 ? 's' : ''}`;
+            if (diffDays === 1) return 'Aujourd\'hui';
+            if (diffDays === 2) return 'Hier';
+            if (diffDays <= 7) return `Il y a ${diffDays - 1} jours`;
             
-            return timestamp.toLocaleDateString('fr-FR');
+            return date.toLocaleDateString('fr-FR');
         }
+
+        function highlightSearchTerm(text, term) {
+            if (!term) return text;
+            const regex = new RegExp(`(${term})`, 'gi');
+            return text.replace(regex, '<span class="search-highlight">$1</span>');
+        }
+
+        function canDeleteStory(story) {
+            const userToken = generateUserToken();
+            return story.authorToken === userToken || isAdminMode;
+        }
+
+        // Story management
+        function addStory(title, content, category) {
+            const userToken = generateUserToken();
+            const story = {
+                id: generateId(),
+                title: title.trim(),
+                content: content.trim(),
+                category: category || 'autre',
+                timestamp: Date.now(),
+                likes: 0,
+                likedBy: [],
+                comments: [],
+                authorToken: userToken
+            };
+            
+            stories.unshift(story);
+            saveStories();
+            renderStories();
+            showNotification('Histoire publiée avec succès!');
+        }
+
+        function deleteStory(storyId) {
+            const storyIndex = stories.findIndex(s => s.id === storyId);
+            if (storyIndex !== -1) {
+                const story = stories[storyIndex];
+                if (canDeleteStory(story)) {
+                    stories.splice(storyIndex, 1);
+                    saveStories();
+                    renderStories();
+                    showNotification('Histoire supprimée avec succès!');
+                } else {
+                    showNotification('Vous ne pouvez pas supprimer cette histoire', 'error');
+                }
+            }
+        }
+
+        function toggleLike(storyId) {
+            const userToken = generateUserToken();
+            const story = stories.find(s => s.id === storyId);
+            
+            if (story) {
+                const likedIndex = story.likedBy.indexOf(userToken);
+                if (likedIndex === -1) {
+                    story.likedBy.push(userToken);
+                    story.likes++;
+                } else {
+                    story.likedBy.splice(likedIndex, 1);
+                    story.likes--;
+                }
+                
+                saveStories();
+                renderStories();
+                
+                const likeBtn = document.querySelector(`[data-story-id="${storyId}"] .like-btn`);
+                if (likeBtn) {
+                    likeBtn.classList.add('like-animation');
+                    setTimeout(() => likeBtn.classList.remove('like-animation'), 300);
+                }
+            }
+        }
+
+        function addComment(storyId, commentText) {
+            const userToken = generateUserToken();
+            const story = stories.find(s => s.id === storyId);
+            
+            if (story && commentText.trim()) {
+                const comment = {
+                    id: generateId(),
+                    text: commentText.trim(),
+                    timestamp: Date.now(),
+                    authorToken: userToken
+                };
+                
+                story.comments.push(comment);
+                saveStories();
+                renderStories();
+                showNotification('Commentaire ajouté!');
+            }
+        }
+
+        function toggleComments(storyId) {
+            const commentSection = document.getElementById(`comments-${storyId}`);
+            if (commentSection) {
+                commentSection.classList.toggle('open');
+            }
+        }
+
+        // Rendering
+        function renderStories() {
+            const container = document.getElementById('storiesContainer');
+            const noStoriesMessage = document.getElementById('noStoriesMessage');
+            
+            let filteredStories = stories;
+            
+            // Apply category filter
+            if (currentFilter !== 'all') {
+                filteredStories = filteredStories.filter(story => story.category === currentFilter);
+            }
+            
+            // Apply search filter
+            if (searchTerm) {
+                filteredStories = filteredStories.filter(story => 
+                    story.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    story.content.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+            }
+            
+            if (filteredStories.length === 0) {
+                container.innerHTML = '';
+                noStoriesMessage.classList.remove('hidden');
+                return;
+            }
+            
+            noStoriesMessage.classList.add('hidden');
+            
+            const userToken = generateUserToken();
+            
+            container.innerHTML = filteredStories.map(story => {
+                const isLiked = story.likedBy.includes(userToken);
+                const canDelete = canDeleteStory(story);
+                const categoryEmoji = {
+                    'amour': '💕',
+                    'travail': '💼',
+                    'famille': '👨‍👩‍👧‍👦',
+                    'amitie': '👫',
+                    'voyage': '✈️',
+                    'autre': '🌟'
+                };
+                
+                return `
+                    <div class="story-card bg-white rounded-2xl shadow-lg p-8 fade-in" data-story-id="${story.id}">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">${categoryEmoji[story.category] || '🌟'}</span>
+                                <div>
+                                    <h3 class="story-title text-xl font-semibold text-gray-800">${highlightSearchTerm(story.title, searchTerm)}</h3>
+                                    <p class="text-sm text-gray-500">${formatDate(story.timestamp)}</p>
+                                </div>
+                            </div>
+                            ${canDelete ? `
+                                <button class="delete-btn text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors" onclick="confirmDeleteStory('${story.id}')">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="story-content text-gray-700 mb-6 leading-relaxed">${highlightSearchTerm(story.content, searchTerm)}</div>
+                        
+                        <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                            <div class="flex items-center gap-4">
+                                <button class="like-btn flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${isLiked ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" onclick="toggleLike('${story.id}')">
+                                    <svg class="w-5 h-5" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                    </svg>
+                                    <span>${story.likes}</span>
+                                </button>
+                                
+                                <button class="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors" onclick="toggleComments('${story.id}')">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                    </svg>
+                                    <span>${story.comments.length}</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="comments-${story.id}" class="comment-section mt-4">
+                            <div class="border-t border-gray-100 pt-4">
+                                <div class="mb-4">
+                                    <div class="flex gap-3">
+                                        <input type="text" id="comment-input-${story.id}" placeholder="Ajouter un commentaire..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors" onclick="submitComment('${story.id}')">
+                                            Envoyer
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-3 max-h-60 overflow-y-auto">
+                                    ${story.comments.map(comment => `
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <div class="comment-text text-gray-700 mb-2">${comment.text}</div>
+                                            <div class="text-xs text-gray-500">${formatDate(comment.timestamp)}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function confirmDeleteStory(storyId) {
+            storyToDelete = storyId;
+            showModal('deleteModal');
+        }
+
+        function submitComment(storyId) {
+            const input = document.getElementById(`comment-input-${storyId}`);
+            const commentText = input.value.trim();
+            
+            if (commentText) {
+                addComment(storyId, commentText);
+                input.value = '';
+            }
+        }
+
+        // Event listeners
+        document.getElementById('storyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('storyTitle').value;
+            const content = document.getElementById('storyContent').value;
+            const category = document.getElementById('storyCategory').value;
+            
+            if (title.trim() && content.trim()) {
+                addStory(title, content, category);
+                this.reset();
+            }
+        });
+
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            searchTerm = e.target.value;
+            renderStories();
+        });
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => {
+                    b.classList.remove('active', 'bg-blue-600', 'text-white');
+                    b.classList.add('bg-white', 'text-gray-700');
+                });
+                
+                this.classList.add('active', 'bg-blue-600', 'text-white');
+                this.classList.remove('bg-white', 'text-gray-700');
+                
+                currentFilter = this.dataset.category;
+                renderStories();
+            });
+        });
+
+        // Admin functionality
+        document.getElementById('adminToggle').addEventListener('click', function() {
+            if (isAdminMode) {
+                isAdminMode = false;
+                this.classList.remove('bg-green-600', 'hover:bg-green-700');
+                this.classList.add('bg-red-600', 'hover:bg-red-700');
+                showNotification('Mode administrateur désactivé');
+                renderStories();
+            } else {
+                showModal('adminModal');
+            }
+        });
+
+        document.getElementById('adminLogin').addEventListener('click', function() {
+            const password = document.getElementById('adminPassword').value;
+            if (password === ADMIN_PASSWORD) {
+                isAdminMode = true;
+                document.getElementById('adminToggle').classList.remove('bg-red-600', 'hover:bg-red-700');
+                document.getElementById('adminToggle').classList.add('bg-green-600', 'hover:bg-green-700');
+                hideModal('adminModal');
+                document.getElementById('adminPassword').value = '';
+                showNotification('Mode administrateur activé');
+                renderStories();
+            } else {
+                showNotification('Mot de passe incorrect', 'error');
+            }
+        });
+
+        document.getElementById('adminCancel').addEventListener('click', function() {
+            hideModal('adminModal');
+            document.getElementById('adminPassword').value = '';
+        });
+
+        // Delete confirmation modal
+        document.getElementById('confirmDelete').addEventListener('click', function() {
+            if (storyToDelete) {
+                deleteStory(storyToDelete);
+                storyToDelete = null;
+                hideModal('deleteModal');
+            }
+        });
+
+        document.getElementById('cancelDelete').addEventListener('click', function() {
+            storyToDelete = null;
+            hideModal('deleteModal');
+        });
+
+        // Close modals when clicking outside
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('show');
+                    if (this.id === 'adminModal') {
+                        document.getElementById('adminPassword').value = '';
+                    }
+                    if (this.id === 'deleteModal') {
+                        storyToDelete = null;
+                    }
+                }
+            });
+        });
+
+        // Handle Enter key in comment inputs
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.target.id && e.target.id.startsWith('comment-input-')) {
+                const storyId = e.target.id.replace('comment-input-', '');
+                submitComment(storyId);
+            }
+        });
+
+        // Handle Enter key in admin password
+        document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('adminLogin').click();
+            }
+        });
+
+        // Initialize
+        renderStories();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'962add05d174c7a3',t:'MTc1MzEwMjYzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'962bc7f220d8c7a0',t:'MTc1MzExMjI2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
