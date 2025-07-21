@@ -18,13 +18,17 @@
             border-left-color: #3b82f6;
             transform: translateY(-2px);
         }
+        .story-card.trending {
+            border-left-color: #f59e0b;
+            background: linear-gradient(135deg, #fef3c7 0%, #ffffff 100%);
+        }
         .comment-section {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.3s ease;
         }
         .comment-section.open {
-            max-height: 600px;
+            max-height: 800px;
         }
         .fade-in {
             animation: fadeIn 0.5s ease-in;
@@ -80,8 +84,10 @@
             background: white;
             border-radius: 16px;
             padding: 24px;
-            max-width: 400px;
+            max-width: 500px;
             width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
             transform: scale(0.9);
             transition: transform 0.3s ease;
         }
@@ -133,210 +139,272 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            z-index: 999;
-        }
-
-        .delete-btn {
-            opacity: 0.7;
-            transition: opacity 0.3s ease;
-        }
-
-        .delete-btn:hover {
-            opacity: 1;
+            background: #1f2937;
+            color: white;
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen">
     <!-- Notification -->
     <div id="notification" class="notification bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
-        <span id="notificationText">Message publié avec succès!</span>
-    </div>
-
-    <!-- Admin Panel -->
-    <div class="admin-panel">
-        <button id="adminToggle" class="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full shadow-lg transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+        <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
             </svg>
-        </button>
-    </div>
-
-    <!-- Admin Login Modal -->
-    <div id="adminModal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 class="text-xl font-semibold mb-4">Accès Administrateur</h3>
-            <input type="password" id="adminPassword" placeholder="Mot de passe" class="w-full p-3 border border-gray-300 rounded-lg mb-4">
-            <div class="flex gap-3">
-                <button id="adminLogin" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition-colors">
-                    Se connecter
-                </button>
-                <button id="adminCancel" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg transition-colors">
-                    Annuler
-                </button>
-            </div>
+            <span id="notificationText">Action réussie !</span>
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="modal-overlay">
+    <!-- Modal pour nouvelle histoire -->
+    <div id="storyModal" class="modal-overlay">
         <div class="modal-content">
-            <h3 class="text-xl font-semibold mb-4">Confirmer la suppression</h3>
-            <p class="text-gray-600 mb-6">Êtes-vous sûr de vouloir supprimer cette histoire? Cette action est irréversible.</p>
-            <div class="flex gap-3">
-                <button id="confirmDelete" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition-colors">
-                    Supprimer
-                </button>
-                <button id="cancelDelete" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg transition-colors">
-                    Annuler
-                </button>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Partager votre histoire</h2>
+                <button onclick="closeStoryModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
             </div>
+            
+            <form id="storyForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Titre de votre histoire</label>
+                    <input type="text" id="storyTitle" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Donnez un titre à votre histoire..." required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
+                    <select id="storyCategory" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="Quotidien">Quotidien</option>
+                        <option value="Rencontres">Rencontres</option>
+                        <option value="Travail">Travail</option>
+                        <option value="Famille">Famille</option>
+                        <option value="Amour">Amour</option>
+                        <option value="Voyage">Voyage</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Votre histoire</label>
+                    <textarea id="storyContent" rows="6" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" placeholder="Racontez votre histoire de manière anonyme..." required></textarea>
+                    <div class="text-sm text-gray-500 mt-1">
+                        <span id="charCount">0</span>/1000 caractères
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeStoryModal()" class="px-6 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        Annuler
+                    </button>
+                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        Publier l'histoire
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
     <div class="container mx-auto px-4 py-8 max-w-4xl">
         <!-- Header -->
-        <div class="text-center mb-12">
+        <header class="text-center mb-12">
             <h1 class="text-4xl font-bold text-gray-800 mb-4">📖 Histoires Anonymes</h1>
-            <p class="text-gray-600 text-lg">Partagez vos histoires en toute anonymité</p>
-        </div>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">Partagez vos expériences, vos émotions et vos réflexions de manière anonyme. Chaque histoire compte.</p>
+        </header>
 
-        <!-- Search Bar -->
-        <div class="mb-8">
-            <div class="relative">
-                <input type="text" id="searchInput" placeholder="Rechercher dans les histoires..." 
-                       class="w-full p-4 pl-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <svg class="absolute left-4 top-4 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
+        <!-- Actions et recherche -->
+        <div class="flex flex-col md:flex-row gap-4 mb-8">
+            <div class="flex-1">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Rechercher dans les histoires..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <svg class="absolute left-3 top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            
+            <div class="flex gap-3">
+                <select id="categoryFilter" class="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Toutes les catégories</option>
+                    <option value="Quotidien">Quotidien</option>
+                    <option value="Rencontres">Rencontres</option>
+                    <option value="Travail">Travail</option>
+                    <option value="Famille">Famille</option>
+                    <option value="Amour">Amour</option>
+                    <option value="Voyage">Voyage</option>
+                    <option value="Autre">Autre</option>
+                </select>
+                
+                <select id="sortFilter" class="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="recent">Plus récentes</option>
+                    <option value="popular">Plus populaires</option>
+                    <option value="trending">Tendances</option>
+                </select>
+                
+                <button onclick="openStoryModal()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium whitespace-nowrap">
+                    ✍️ Nouvelle histoire
+                </button>
             </div>
         </div>
 
-        <!-- Story Form -->
-        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6">✍️ Partager votre histoire</h2>
-            <form id="storyForm">
-                <div class="mb-6">
-                    <input type="text" id="storyTitle" placeholder="Titre de votre histoire..." 
-                           class="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-wrap" required>
+        <!-- Statistiques -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div class="flex items-center">
+                    <div class="p-3 bg-blue-100 rounded-lg">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Histoires partagées</p>
+                        <p class="text-2xl font-bold text-gray-900" id="totalStories">0</p>
+                    </div>
                 </div>
-                <div class="mb-6">
-                    <textarea id="storyContent" placeholder="Racontez votre histoire..." rows="6"
-                              class="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-wrap" required></textarea>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div class="flex items-center">
+                    <div class="p-3 bg-red-100 rounded-lg">
+                        <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Likes totaux</p>
+                        <p class="text-2xl font-bold text-gray-900" id="totalLikes">0</p>
+                    </div>
                 </div>
-                <div class="mb-6">
-                    <select id="storyCategory" class="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Choisir une catégorie</option>
-                        <option value="amour">💕 Amour</option>
-                        <option value="travail">💼 Travail</option>
-                        <option value="famille">👨‍👩‍👧‍👦 Famille</option>
-                        <option value="amitie">👫 Amitié</option>
-                        <option value="voyage">✈️ Voyage</option>
-                        <option value="autre">🌟 Autre</option>
-                    </select>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div class="flex items-center">
+                    <div class="p-3 bg-green-100 rounded-lg">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Commentaires</p>
+                        <p class="text-2xl font-bold text-gray-900" id="totalComments">0</p>
+                    </div>
                 </div>
-                <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105">
-                    📝 Publier anonymement
-                </button>
-            </form>
+            </div>
         </div>
 
-        <!-- Filter Buttons -->
-        <div class="flex flex-wrap gap-3 mb-8 justify-center">
-            <button class="filter-btn active bg-blue-600 text-white px-6 py-3 rounded-full font-medium transition-all hover:bg-blue-700" data-category="all">
-                Toutes
-            </button>
-            <button class="filter-btn bg-white text-gray-700 px-6 py-3 rounded-full font-medium transition-all hover:bg-gray-100" data-category="amour">
-                💕 Amour
-            </button>
-            <button class="filter-btn bg-white text-gray-700 px-6 py-3 rounded-full font-medium transition-all hover:bg-gray-100" data-category="travail">
-                💼 Travail
-            </button>
-            <button class="filter-btn bg-white text-gray-700 px-6 py-3 rounded-full font-medium transition-all hover:bg-gray-100" data-category="famille">
-                👨‍👩‍👧‍👦 Famille
-            </button>
-            <button class="filter-btn bg-white text-gray-700 px-6 py-3 rounded-full font-medium transition-all hover:bg-gray-100" data-category="amitie">
-                👫 Amitié
-            </button>
-            <button class="filter-btn bg-white text-gray-700 px-6 py-3 rounded-full font-medium transition-all hover:bg-gray-100" data-category="voyage">
-                ✈️ Voyage
-            </button>
-            <button class="filter-btn bg-white text-gray-700 px-6 py-3 rounded-full font-medium transition-all hover:bg-gray-100" data-category="autre">
-                🌟 Autre
-            </button>
-        </div>
-
-        <!-- Stories Container -->
+        <!-- Liste des histoires -->
         <div id="storiesContainer" class="space-y-6">
-            <!-- Stories will be dynamically added here -->
+            <!-- Les histoires seront générées ici -->
         </div>
 
-        <!-- No stories message -->
+        <!-- Message si aucune histoire -->
         <div id="noStoriesMessage" class="text-center py-12 hidden">
-            <div class="text-6xl mb-4">📚</div>
-            <h3 class="text-xl font-semibold text-gray-600 mb-2">Aucune histoire trouvée</h3>
-            <p class="text-gray-500">Soyez le premier à partager votre histoire!</p>
+            <div class="text-gray-400 text-6xl mb-4">📖</div>
+            <h3 class="text-xl font-medium text-gray-600 mb-2">Aucune histoire trouvée</h3>
+            <p class="text-gray-500">Essayez de modifier vos critères de recherche ou soyez le premier à partager une histoire !</p>
         </div>
     </div>
 
+    <!-- Panel d'administration -->
+    <div class="admin-panel">
+        <div class="text-xs mb-2">Histoires: <span id="adminStoryCount">0</span></div>
+        <button onclick="clearAllData()" class="text-xs bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-white">
+            Effacer tout
+        </button>
+    </div>
+
     <script>
-        // Configuration
-        const ADMIN_PASSWORD = "admin123"; // Changez ce mot de passe!
-        let isAdminMode = false;
-        let stories = JSON.parse(localStorage.getItem('anonymousStories')) || [];
-        let currentFilter = 'all';
-        let searchTerm = '';
-        let storyToDelete = null;
-
-        // Utility functions
-        function generateId() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2);
-        }
-
-        function generateUserToken() {
-            let token = localStorage.getItem('userToken');
-            if (!token) {
-                token = generateId();
-                localStorage.setItem('userToken', token);
+        // Stockage global partagé pour toutes les histoires
+        let stories = JSON.parse(localStorage.getItem('globalStories')) || [
+            {
+                id: 1,
+                title: "Une rencontre inattendue",
+                content: "Hier, dans le métro, j'ai croisé le regard d'un inconnu. Pendant quelques secondes, le temps s'est arrêté. Nous nous sommes souri, puis chacun a continué son chemin. Parfois, ces petits moments valent tous les grands discours du monde.",
+                author: "Anonyme",
+                timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+                likes: 42,
+                comments: [
+                    { id: 1, author: "Lecteur1", content: "C'est beau ces petits moments de connexion humaine !", timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000) },
+                    { id: 2, author: "Lecteur2", content: "J'ai vécu la même chose la semaine dernière !", timestamp: new Date(Date.now() - 30 * 60 * 1000) }
+                ],
+                trending: true,
+                category: "Rencontres"
+            },
+            {
+                id: 2,
+                title: "Le courage de partir",
+                content: "Après 10 ans dans le même travail, j'ai enfin trouvé le courage de démissionner pour poursuivre mon rêve. C'est terrifiant mais libérateur à la fois.",
+                author: "Anonyme",
+                timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000),
+                likes: 28,
+                comments: [
+                    { id: 3, author: "Lecteur3", content: "Bravo pour ce courage ! Vous nous inspirez.", timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) }
+                ],
+                trending: false,
+                category: "Travail"
+            },
+            {
+                id: 3,
+                title: "Un geste qui change tout",
+                content: "Ma voisine âgée m'a apporté des cookies faits maison aujourd'hui. Un simple geste qui a illuminé ma journée difficile. La gentillesse existe encore.",
+                author: "Anonyme",
+                timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000),
+                likes: 67,
+                comments: [],
+                trending: true,
+                category: "Quotidien"
             }
-            return token;
-        }
+        ];
 
+        let currentUser = "Utilisateur" + Math.floor(Math.random() * 1000);
+        let searchTerm = '';
+        let selectedCategory = '';
+        let sortBy = 'recent';
+
+        // Sauvegarder les histoires dans le stockage global
         function saveStories() {
-            localStorage.setItem('anonymousStories', JSON.stringify(stories));
+            localStorage.setItem('globalStories', JSON.stringify(stories));
+            updateStats();
         }
 
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            const notificationText = document.getElementById('notificationText');
+        // Charger les histoires depuis le stockage global
+        function loadStories() {
+            const savedStories = localStorage.getItem('globalStories');
+            if (savedStories) {
+                stories = JSON.parse(savedStories);
+                // Convertir les timestamps en objets Date
+                stories.forEach(story => {
+                    story.timestamp = new Date(story.timestamp);
+                    story.comments.forEach(comment => {
+                        comment.timestamp = new Date(comment.timestamp);
+                    });
+                });
+            }
+            updateStats();
+            renderStories();
+        }
+
+        function updateStats() {
+            const totalStories = stories.length;
+            const totalLikes = stories.reduce((sum, story) => sum + story.likes, 0);
+            const totalComments = stories.reduce((sum, story) => sum + story.comments.length, 0);
             
-            notificationText.textContent = message;
-            notification.className = `notification px-6 py-3 rounded-lg shadow-lg ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`;
-            notification.classList.add('show');
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
+            document.getElementById('totalStories').textContent = totalStories;
+            document.getElementById('totalLikes').textContent = totalLikes;
+            document.getElementById('totalComments').textContent = totalComments;
+            document.getElementById('adminStoryCount').textContent = totalStories;
         }
 
-        function showModal(modalId) {
-            document.getElementById(modalId).classList.add('show');
-        }
-
-        function hideModal(modalId) {
-            document.getElementById(modalId).classList.remove('show');
-        }
-
-        function formatDate(timestamp) {
-            const date = new Date(timestamp);
+        function formatTimeAgo(date) {
             const now = new Date();
-            const diffTime = Math.abs(now - date);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const diffInSeconds = Math.floor((now - date) / 1000);
             
-            if (diffDays === 1) return 'Aujourd\'hui';
-            if (diffDays === 2) return 'Hier';
-            if (diffDays <= 7) return `Il y a ${diffDays - 1} jours`;
-            
-            return date.toLocaleDateString('fr-FR');
+            if (diffInSeconds < 60) return 'À l\'instant';
+            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} min`;
+            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h`;
+            if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}j`;
+            return `${Math.floor(diffInSeconds / 2592000)} mois`;
         }
 
         function highlightSearchTerm(text, term) {
@@ -345,117 +413,37 @@
             return text.replace(regex, '<span class="search-highlight">$1</span>');
         }
 
-        function canDeleteStory(story) {
-            const userToken = generateUserToken();
-            return story.authorToken === userToken || isAdminMode;
-        }
-
-        // Story management
-        function addStory(title, content, category) {
-            const userToken = generateUserToken();
-            const story = {
-                id: generateId(),
-                title: title.trim(),
-                content: content.trim(),
-                category: category || 'autre',
-                timestamp: Date.now(),
-                likes: 0,
-                likedBy: [],
-                comments: [],
-                authorToken: userToken
-            };
-            
-            stories.unshift(story);
-            saveStories();
-            renderStories();
-            showNotification('Histoire publiée avec succès!');
-        }
-
-        function deleteStory(storyId) {
-            const storyIndex = stories.findIndex(s => s.id === storyId);
-            if (storyIndex !== -1) {
-                const story = stories[storyIndex];
-                if (canDeleteStory(story)) {
-                    stories.splice(storyIndex, 1);
-                    saveStories();
-                    renderStories();
-                    showNotification('Histoire supprimée avec succès!');
-                } else {
-                    showNotification('Vous ne pouvez pas supprimer cette histoire', 'error');
-                }
-            }
-        }
-
-        function toggleLike(storyId) {
-            const userToken = generateUserToken();
-            const story = stories.find(s => s.id === storyId);
-            
-            if (story) {
-                const likedIndex = story.likedBy.indexOf(userToken);
-                if (likedIndex === -1) {
-                    story.likedBy.push(userToken);
-                    story.likes++;
-                } else {
-                    story.likedBy.splice(likedIndex, 1);
-                    story.likes--;
-                }
+        function getFilteredAndSortedStories() {
+            let filteredStories = stories.filter(story => {
+                const matchesSearch = !searchTerm || 
+                    story.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    story.content.toLowerCase().includes(searchTerm.toLowerCase());
                 
-                saveStories();
-                renderStories();
+                const matchesCategory = !selectedCategory || story.category === selectedCategory;
                 
-                const likeBtn = document.querySelector(`[data-story-id="${storyId}"] .like-btn`);
-                if (likeBtn) {
-                    likeBtn.classList.add('like-animation');
-                    setTimeout(() => likeBtn.classList.remove('like-animation'), 300);
+                return matchesSearch && matchesCategory;
+            });
+
+            // Tri
+            filteredStories.sort((a, b) => {
+                switch(sortBy) {
+                    case 'popular':
+                        return b.likes - a.likes;
+                    case 'trending':
+                        return (b.trending ? 1 : 0) - (a.trending ? 1 : 0) || b.likes - a.likes;
+                    case 'recent':
+                    default:
+                        return b.timestamp - a.timestamp;
                 }
-            }
+            });
+
+            return filteredStories;
         }
 
-        function addComment(storyId, commentText) {
-            const userToken = generateUserToken();
-            const story = stories.find(s => s.id === storyId);
-            
-            if (story && commentText.trim()) {
-                const comment = {
-                    id: generateId(),
-                    text: commentText.trim(),
-                    timestamp: Date.now(),
-                    authorToken: userToken
-                };
-                
-                story.comments.push(comment);
-                saveStories();
-                renderStories();
-                showNotification('Commentaire ajouté!');
-            }
-        }
-
-        function toggleComments(storyId) {
-            const commentSection = document.getElementById(`comments-${storyId}`);
-            if (commentSection) {
-                commentSection.classList.toggle('open');
-            }
-        }
-
-        // Rendering
         function renderStories() {
             const container = document.getElementById('storiesContainer');
             const noStoriesMessage = document.getElementById('noStoriesMessage');
-            
-            let filteredStories = stories;
-            
-            // Apply category filter
-            if (currentFilter !== 'all') {
-                filteredStories = filteredStories.filter(story => story.category === currentFilter);
-            }
-            
-            // Apply search filter
-            if (searchTerm) {
-                filteredStories = filteredStories.filter(story => 
-                    story.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    story.content.toLowerCase().includes(searchTerm.toLowerCase())
-                );
-            }
+            const filteredStories = getFilteredAndSortedStories();
             
             if (filteredStories.length === 0) {
                 container.innerHTML = '';
@@ -465,213 +453,478 @@
             
             noStoriesMessage.classList.add('hidden');
             
-            const userToken = generateUserToken();
-            
-            container.innerHTML = filteredStories.map(story => {
-                const isLiked = story.likedBy.includes(userToken);
-                const canDelete = canDeleteStory(story);
-                const categoryEmoji = {
-                    'amour': '💕',
-                    'travail': '💼',
-                    'famille': '👨‍👩‍👧‍👦',
-                    'amitie': '👫',
-                    'voyage': '✈️',
-                    'autre': '🌟'
-                };
-                
-                return `
-                    <div class="story-card bg-white rounded-2xl shadow-lg p-8 fade-in" data-story-id="${story.id}">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="text-2xl">${categoryEmoji[story.category] || '🌟'}</span>
-                                <div>
-                                    <h3 class="story-title text-xl font-semibold text-gray-800">${highlightSearchTerm(story.title, searchTerm)}</h3>
-                                    <p class="text-sm text-gray-500">${formatDate(story.timestamp)}</p>
-                                </div>
+            container.innerHTML = filteredStories.map(story => `
+                <article class="story-card bg-white rounded-xl p-6 shadow-sm border border-gray-100 ${story.trending ? 'trending' : ''} fade-in">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h2 class="story-title text-xl font-semibold text-gray-800">${highlightSearchTerm(story.title, searchTerm)}</h2>
+                                ${story.trending ? '<span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full font-medium">🔥 Tendance</span>' : ''}
                             </div>
-                            ${canDelete ? `
-                                <button class="delete-btn text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors" onclick="confirmDeleteStory('${story.id}')">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
-                                </button>
-                            ` : ''}
-                        </div>
-                        
-                        <div class="story-content text-gray-700 mb-6 leading-relaxed">${highlightSearchTerm(story.content, searchTerm)}</div>
-                        
-                        <div class="flex items-center justify-between pt-4 border-t border-gray-100">
-                            <div class="flex items-center gap-4">
-                                <button class="like-btn flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${isLiked ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" onclick="toggleLike('${story.id}')">
-                                    <svg class="w-5 h-5" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                                    </svg>
-                                    <span>${story.likes}</span>
-                                </button>
-                                
-                                <button class="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors" onclick="toggleComments('${story.id}')">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                                    </svg>
-                                    <span>${story.comments.length}</span>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div id="comments-${story.id}" class="comment-section mt-4">
-                            <div class="border-t border-gray-100 pt-4">
-                                <div class="mb-4">
-                                    <div class="flex gap-3">
-                                        <input type="text" id="comment-input-${story.id}" placeholder="Ajouter un commentaire..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors" onclick="submitComment('${story.id}')">
-                                            Envoyer
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <div class="space-y-3 max-h-60 overflow-y-auto">
-                                    ${story.comments.map(comment => `
-                                        <div class="bg-gray-50 p-4 rounded-lg">
-                                            <div class="comment-text text-gray-700 mb-2">${comment.text}</div>
-                                            <div class="text-xs text-gray-500">${formatDate(comment.timestamp)}</div>
-                                        </div>
-                                    `).join('')}
-                                </div>
+                            <div class="flex items-center text-sm text-gray-500 gap-4">
+                                <span>👤 ${story.author}</span>
+                                <span>🕒 ${formatTimeAgo(story.timestamp)}</span>
+                                <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs">${story.category}</span>
                             </div>
                         </div>
                     </div>
-                `;
-            }).join('');
+                    
+                    <div class="story-content text-gray-700 mb-4 leading-relaxed">${highlightSearchTerm(story.content, searchTerm)}</div>
+                    
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <div class="flex items-center gap-4">
+                            <button onclick="toggleLike(${story.id})" class="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors">
+                                <svg class="w-5 h-5 ${story.liked ? 'text-red-500 fill-current' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                </svg>
+                                <span>${story.likes}</span>
+                            </button>
+                            
+                            <button onclick="toggleComments(${story.id})" class="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                </svg>
+                                <span>${story.comments.length}</span>
+                            </button>
+                        </div>
+                        
+                        <button onclick="shareStory(${story.id})" class="text-gray-600 hover:text-green-500 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
+                            </svg>
+                        </button>
+                        
+                        ${story.author === currentUser || isAdmin ? `
+                            <button onclick="deleteStory(${story.id})" class="text-gray-600 hover:text-red-500 transition-colors ml-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        ` : ''}
+                    </div>
+                    
+                    <!-- Section commentaires -->
+                    <div id="comments-${story.id}" class="comment-section mt-4">
+                        <div class="space-y-3 mb-4">
+                            ${story.comments.map(comment => `
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <div class="flex justify-between items-start mb-1">
+                                        <span class="font-medium text-sm text-gray-700">${comment.author}</span>
+                                        <span class="text-xs text-gray-500">${formatTimeAgo(comment.timestamp)}</span>
+                                    </div>
+                                    <p class="comment-text text-gray-600 text-sm">${comment.content}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <input type="text" id="comment-input-${story.id}" placeholder="Ajouter un commentaire..." class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <button onclick="addComment(${story.id})" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                                Publier
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
         }
 
-        function confirmDeleteStory(storyId) {
-            storyToDelete = storyId;
-            showModal('deleteModal');
+        function toggleLike(storyId) {
+            const story = stories.find(s => s.id === storyId);
+            if (story) {
+                story.likes += story.liked ? -1 : 1;
+                story.liked = !story.liked;
+                
+                // Animation
+                const button = event.currentTarget;
+                button.classList.add('like-animation');
+                setTimeout(() => button.classList.remove('like-animation'), 300);
+                
+                saveStories();
+                renderStories();
+            }
         }
 
-        function submitComment(storyId) {
+        function toggleComments(storyId) {
+            const commentsSection = document.getElementById(`comments-${storyId}`);
+            commentsSection.classList.toggle('open');
+        }
+
+        function addComment(storyId) {
             const input = document.getElementById(`comment-input-${storyId}`);
-            const commentText = input.value.trim();
+            const content = input.value.trim();
             
-            if (commentText) {
-                addComment(storyId, commentText);
-                input.value = '';
+            if (content) {
+                const story = stories.find(s => s.id === storyId);
+                if (story) {
+                    const newComment = {
+                        id: Date.now(),
+                        author: currentUser,
+                        content: content,
+                        timestamp: new Date()
+                    };
+                    
+                    story.comments.push(newComment);
+                    input.value = '';
+                    
+                    saveStories();
+                    renderStories();
+                    
+                    // Rouvrir la section commentaires
+                    setTimeout(() => {
+                        document.getElementById(`comments-${storyId}`).classList.add('open');
+                    }, 100);
+                    
+                    showNotification('Commentaire ajouté !');
+                }
             }
         }
 
-        // Event listeners
-        document.getElementById('storyForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const title = document.getElementById('storyTitle').value;
-            const content = document.getElementById('storyContent').value;
-            const category = document.getElementById('storyCategory').value;
-            
-            if (title.trim() && content.trim()) {
-                addStory(title, content, category);
-                this.reset();
+        function shareStory(storyId) {
+            const story = stories.find(s => s.id === storyId);
+            if (story && navigator.share) {
+                navigator.share({
+                    title: story.title,
+                    text: story.content,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback pour copier dans le presse-papiers
+                const text = `${story.title}\n\n${story.content}\n\nLu sur Histoires Anonymes`;
+                navigator.clipboard.writeText(text).then(() => {
+                    showNotification('Histoire copiée dans le presse-papiers !');
+                });
             }
-        });
+        }
 
-        document.getElementById('searchInput').addEventListener('input', function(e) {
+        function openStoryModal() {
+            document.getElementById('storyModal').classList.add('show');
+            document.getElementById('storyTitle').focus();
+        }
+
+        function closeStoryModal() {
+            document.getElementById('storyModal').classList.remove('show');
+            document.getElementById('storyForm').reset();
+            document.getElementById('charCount').textContent = '0';
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
+            
+            notificationText.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function clearAllData() {
+            if (confirm('Êtes-vous sûr de vouloir effacer toutes les histoires ? Cette action est irréversible.')) {
+                localStorage.removeItem('globalStories');
+                stories = [];
+                saveStories();
+                renderStories();
+                showNotification('Toutes les données ont été effacées');
+            }
+        }
+
+        // Gestionnaires d'événements
+        document.getElementById('searchInput').addEventListener('input', (e) => {
             searchTerm = e.target.value;
             renderStories();
         });
 
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.filter-btn').forEach(b => {
-                    b.classList.remove('active', 'bg-blue-600', 'text-white');
-                    b.classList.add('bg-white', 'text-gray-700');
-                });
+        document.getElementById('categoryFilter').addEventListener('change', (e) => {
+            selectedCategory = e.target.value;
+            renderStories();
+        });
+
+        document.getElementById('sortFilter').addEventListener('change', (e) => {
+            sortBy = e.target.value;
+            renderStories();
+        });
+
+        document.getElementById('storyContent').addEventListener('input', (e) => {
+            const charCount = e.target.value.length;
+            document.getElementById('charCount').textContent = charCount;
+            
+            if (charCount > 1000) {
+                e.target.value = e.target.value.substring(0, 1000);
+                document.getElementById('charCount').textContent = '1000';
+            }
+        });
+
+        document.getElementById('storyForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('storyTitle').value.trim();
+            const content = document.getElementById('storyContent').value.trim();
+            const category = document.getElementById('storyCategory').value;
+            
+            if (title && content) {
+                const newStory = {
+                    id: Date.now(),
+                    title: title,
+                    content: content,
+                    author: currentUser,
+                    timestamp: new Date(),
+                    likes: 0,
+                    comments: [],
+                    trending: false,
+                    category: category,
+                    liked: false
+                };
                 
-                this.classList.add('active', 'bg-blue-600', 'text-white');
-                this.classList.remove('bg-white', 'text-gray-700');
-                
-                currentFilter = this.dataset.category;
+                stories.unshift(newStory);
+                saveStories();
                 renderStories();
+                closeStoryModal();
+                showNotification('Votre histoire a été publiée et est maintenant visible par tous !');
+            }
+        });
+
+        // Fermer le modal en cliquant à l'extérieur
+        document.getElementById('storyModal').addEventListener('click', (e) => {
+            if (e.target.id === 'storyModal') {
+                closeStoryModal();
+            }
+        });
+
+        // Fonctions d'administration
+        function showAdminLogin() {
+            document.getElementById('adminLoginModal').classList.add('show');
+            document.getElementById('adminPassword').focus();
+        }
+
+        function closeAdminLogin() {
+            document.getElementById('adminLoginModal').classList.remove('show');
+            document.getElementById('adminLoginForm').reset();
+        }
+
+        function showAdminInterface() {
+            document.getElementById('adminInterface').classList.remove('hidden');
+            updateAdminStats();
+            renderAdminStories();
+        }
+
+        function closeAdminInterface() {
+            document.getElementById('adminInterface').classList.add('hidden');
+            isAdmin = false;
+        }
+
+        function updateAdminStats() {
+            const totalStories = stories.length;
+            const totalLikes = stories.reduce((sum, story) => sum + story.likes, 0);
+            const totalComments = stories.reduce((sum, story) => sum + story.comments.length, 0);
+            const uniqueAuthors = [...new Set(stories.map(story => story.author))].length;
+            const trendingCount = stories.filter(story => story.trending).length;
+            const popularCount = stories.filter(story => story.likes > 20).length;
+
+            document.getElementById('adminTotalStories').textContent = totalStories;
+            document.getElementById('adminTotalLikes').textContent = totalLikes;
+            document.getElementById('adminTotalComments').textContent = totalComments;
+            document.getElementById('adminActiveUsers').textContent = uniqueAuthors;
+            document.getElementById('adminAuthors').textContent = uniqueAuthors;
+            document.getElementById('adminTrendingCount').textContent = trendingCount;
+            document.getElementById('adminPopularCount').textContent = popularCount;
+        }
+
+        function renderAdminStories() {
+            const container = document.getElementById('adminStoriesList');
+            const searchTerm = document.getElementById('adminSearchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('adminCategoryFilter').value;
+
+            let filteredStories = stories.filter(story => {
+                const matchesSearch = !searchTerm || 
+                    story.title.toLowerCase().includes(searchTerm) ||
+                    story.content.toLowerCase().includes(searchTerm) ||
+                    story.author.toLowerCase().includes(searchTerm);
+                
+                const matchesCategory = !categoryFilter || story.category === categoryFilter;
+                
+                return matchesSearch && matchesCategory;
             });
-        });
 
-        // Admin functionality
-        document.getElementById('adminToggle').addEventListener('click', function() {
-            if (isAdminMode) {
-                isAdminMode = false;
-                this.classList.remove('bg-green-600', 'hover:bg-green-700');
-                this.classList.add('bg-red-600', 'hover:bg-red-700');
-                showNotification('Mode administrateur désactivé');
+            container.innerHTML = filteredStories.map(story => `
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-white">${story.title}</h3>
+                            <p class="text-sm text-gray-300">Par: ${story.author} • ${formatTimeAgo(story.timestamp)} • ${story.category}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="toggleStoryTrending(${story.id})" class="px-2 py-1 text-xs rounded ${story.trending ? 'bg-yellow-600 text-white' : 'bg-gray-600 text-gray-300'}">
+                                ${story.trending ? 'Tendance' : 'Normal'}
+                            </button>
+                            <button onclick="deleteStoryAdmin(${story.id})" class="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700">
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 text-sm mb-2">${story.content.substring(0, 100)}${story.content.length > 100 ? '...' : ''}</p>
+                    <div class="flex gap-4 text-xs text-gray-400">
+                        <span>❤️ ${story.likes} likes</span>
+                        <span>💬 ${story.comments.length} commentaires</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteStory(storyId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cette histoire ?')) {
+                stories = stories.filter(story => story.id !== storyId);
+                saveStories();
                 renderStories();
-            } else {
-                showModal('adminModal');
+                showNotification('Histoire supprimée');
             }
-        });
+        }
 
-        document.getElementById('adminLogin').addEventListener('click', function() {
-            const password = document.getElementById('adminPassword').value;
-            if (password === ADMIN_PASSWORD) {
-                isAdminMode = true;
-                document.getElementById('adminToggle').classList.remove('bg-red-600', 'hover:bg-red-700');
-                document.getElementById('adminToggle').classList.add('bg-green-600', 'hover:bg-green-700');
-                hideModal('adminModal');
-                document.getElementById('adminPassword').value = '';
-                showNotification('Mode administrateur activé');
+        function deleteStoryAdmin(storyId) {
+            if (confirm('Supprimer définitivement cette histoire ?')) {
+                stories = stories.filter(story => story.id !== storyId);
+                saveStories();
                 renderStories();
-            } else {
-                showNotification('Mot de passe incorrect', 'error');
+                renderAdminStories();
+                updateAdminStats();
+                showNotification('Histoire supprimée par l\'administrateur');
             }
-        });
+        }
 
-        document.getElementById('adminCancel').addEventListener('click', function() {
-            hideModal('adminModal');
-            document.getElementById('adminPassword').value = '';
-        });
-
-        // Delete confirmation modal
-        document.getElementById('confirmDelete').addEventListener('click', function() {
-            if (storyToDelete) {
-                deleteStory(storyToDelete);
-                storyToDelete = null;
-                hideModal('deleteModal');
+        function toggleStoryTrending(storyId) {
+            const story = stories.find(s => s.id === storyId);
+            if (story) {
+                story.trending = !story.trending;
+                saveStories();
+                renderStories();
+                renderAdminStories();
+                updateAdminStats();
+                showNotification(story.trending ? 'Marqué comme tendance' : 'Retiré des tendances');
             }
-        });
+        }
 
-        document.getElementById('cancelDelete').addEventListener('click', function() {
-            storyToDelete = null;
-            hideModal('deleteModal');
-        });
+        function markAllAsTrending() {
+            if (confirm('Marquer toutes les histoires comme tendances ?')) {
+                stories.forEach(story => story.trending = true);
+                saveStories();
+                renderStories();
+                renderAdminStories();
+                updateAdminStats();
+                showNotification('Toutes les histoires marquées comme tendances');
+            }
+        }
 
-        // Close modals when clicking outside
-        document.querySelectorAll('.modal-overlay').forEach(modal => {
-            modal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.classList.remove('show');
-                    if (this.id === 'adminModal') {
-                        document.getElementById('adminPassword').value = '';
-                    }
-                    if (this.id === 'deleteModal') {
-                        storyToDelete = null;
-                    }
+        function clearAllTrending() {
+            if (confirm('Retirer toutes les histoires des tendances ?')) {
+                stories.forEach(story => story.trending = false);
+                saveStories();
+                renderStories();
+                renderAdminStories();
+                updateAdminStats();
+                showNotification('Toutes les tendances supprimées');
+            }
+        }
+
+        function saveAdminSettings() {
+            adminSettings = {
+                autoModeration: document.getElementById('autoModeration').checked,
+                requireApproval: document.getElementById('requireApproval').checked,
+                charLimit: parseInt(document.getElementById('charLimit').value),
+                dailyLimit: parseInt(document.getElementById('dailyLimit').value)
+            };
+            localStorage.setItem('adminSettings', JSON.stringify(adminSettings));
+            showNotification('Paramètres sauvegardés');
+        }
+
+        function exportData() {
+            const data = {
+                stories: stories,
+                settings: adminSettings,
+                exportDate: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `histoires-anonymes-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotification('Données exportées');
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            if (data.stories && Array.isArray(data.stories)) {
+                                stories = data.stories.map(story => ({
+                                    ...story,
+                                    timestamp: new Date(story.timestamp)
+                                }));
+                                if (data.settings) {
+                                    adminSettings = data.settings;
+                                    localStorage.setItem('adminSettings', JSON.stringify(adminSettings));
+                                }
+                                saveStories();
+                                renderStories();
+                                renderAdminStories();
+                                updateAdminStats();
+                                showNotification('Données importées avec succès');
+                            } else {
+                                throw new Error('Format de fichier invalide');
+                            }
+                        } catch (error) {
+                            showNotification('Erreur lors de l\'importation: ' + error.message);
+                        }
+                    };
+                    reader.readAsText(file);
                 }
-            });
-        });
+            };
+            input.click();
+        }
 
-        // Handle Enter key in comment inputs
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && e.target.id && e.target.id.startsWith('comment-input-')) {
-                const storyId = e.target.id.replace('comment-input-', '');
-                submitComment(storyId);
+        // Gestionnaires d'événements pour l'admin
+        document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const password = document.getElementById('adminPassword').value;
+            
+            if (password === adminPassword) {
+                isAdmin = true;
+                closeAdminLogin();
+                showAdminInterface();
+                showNotification('Connexion administrateur réussie');
+            } else {
+                showNotification('Mot de passe incorrect');
             }
         });
 
-        // Handle Enter key in admin password
-        document.getElementById('adminPassword').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('adminLogin').click();
+        document.getElementById('adminSearchInput').addEventListener('input', renderAdminStories);
+        document.getElementById('adminCategoryFilter').addEventListener('change', renderAdminStories);
+
+        // Fermer les modals en cliquant à l'extérieur
+        document.getElementById('adminLoginModal').addEventListener('click', (e) => {
+            if (e.target.id === 'adminLoginModal') {
+                closeAdminLogin();
             }
         });
 
-        // Initialize
-        renderStories();
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStories();
+            
+            // Charger les paramètres admin
+            document.getElementById('autoModeration').checked = adminSettings.autoModeration;
+            document.getElementById('requireApproval').checked = adminSettings.requireApproval;
+            document.getElementById('charLimit').value = adminSettings.charLimit;
+            document.getElementById('dailyLimit').value = adminSettings.dailyLimit;
+        });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'962bc7f220d8c7a0',t:'MTc1MzExMjI2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'962c236c104bc7a0',t:'MTc1MzExNjAwOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
