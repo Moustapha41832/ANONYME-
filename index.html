@@ -3,48 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Histoires Anonymes</title>
+    <title>Histoires Anonymes - Plateforme Indépendante</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        
+        :root {
+            --bg-primary: #f9fafb;
+            --bg-secondary: #ffffff;
+            --bg-accent: #f3f4f6;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --text-accent: #3b82f6;
+            --border-color: #e5e7eb;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --bg-accent: #374151;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-accent: #60a5fa;
+            --border-color: #4b5563;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="red"] {
+            --bg-primary: #fef2f2;
+            --bg-secondary: #ffffff;
+            --bg-accent: #fee2e2;
+            --text-primary: #7f1d1d;
+            --text-secondary: #991b1b;
+            --text-accent: #dc2626;
+            --border-color: #fecaca;
+            --shadow: 0 1px 3px 0 rgba(220, 38, 38, 0.1);
+        }
+
+        [data-theme="blue"] {
+            --bg-primary: #eff6ff;
+            --bg-secondary: #ffffff;
+            --bg-accent: #dbeafe;
+            --text-primary: #1e3a8a;
+            --text-secondary: #1d4ed8;
+            --text-accent: #2563eb;
+            --border-color: #bfdbfe;
+            --shadow: 0 1px 3px 0 rgba(37, 99, 235, 0.1);
+        }
+
+        [data-theme="green"] {
+            --bg-primary: #f0fdf4;
+            --bg-secondary: #ffffff;
+            --bg-accent: #dcfce7;
+            --text-primary: #14532d;
+            --text-secondary: #166534;
+            --text-accent: #16a34a;
+            --border-color: #bbf7d0;
+            --shadow: 0 1px 3px 0 rgba(22, 163, 74, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .themed-bg {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+            box-shadow: var(--shadow);
+        }
+
+        .themed-bg-accent {
+            background-color: var(--bg-accent);
+        }
+
+        .themed-text {
+            color: var(--text-primary);
+        }
+
+        .themed-text-secondary {
+            color: var(--text-secondary);
+        }
+
+        .themed-text-accent {
+            color: var(--text-accent);
+        }
+
+        .themed-border {
+            border-color: var(--border-color);
+        }
+
         .story-card {
             transition: all 0.3s ease;
             border-left: 4px solid transparent;
             word-wrap: break-word;
             overflow-wrap: break-word;
         }
+        
         .story-card:hover {
-            border-left-color: #3b82f6;
+            border-left-color: var(--text-accent);
             transform: translateY(-2px);
         }
+        
         .story-card.trending {
             border-left-color: #f59e0b;
-            background: linear-gradient(135deg, #fef3c7 0%, #ffffff 100%);
+            background: linear-gradient(135deg, #fef3c7 0%, var(--bg-secondary) 100%);
         }
+        
         .comment-section {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.3s ease;
         }
+        
         .comment-section.open {
             max-height: 800px;
         }
+        
         .fade-in {
             animation: fadeIn 0.5s ease-in;
         }
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        
         .like-animation {
             animation: likeScale 0.3s ease;
         }
+        
         @keyframes likeScale {
             0% { transform: scale(1); }
             50% { transform: scale(1.2); }
             100% { transform: scale(1); }
         }
+        
         .notification {
             position: fixed;
             top: 20px;
@@ -53,14 +150,17 @@
             transform: translateX(400px);
             transition: transform 0.3s ease;
         }
+        
         .notification.show {
             transform: translateX(0);
         }
+        
         .search-highlight {
             background-color: #fef3c7;
             padding: 2px 4px;
             border-radius: 4px;
         }
+        
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -76,23 +176,43 @@
             visibility: hidden;
             transition: all 0.3s ease;
         }
+        
         .modal-overlay.show {
             opacity: 1;
             visibility: visible;
         }
+        
         .modal-content {
-            background: white;
+            background: var(--bg-secondary);
             border-radius: 16px;
-            padding: 24px;
+            padding: 16px;
             max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
+            width: 95%;
+            max-height: 90vh;
             overflow-y: auto;
             transform: scale(0.9);
             transition: transform 0.3s ease;
+            margin: 10px;
+            border: 1px solid var(--border-color);
         }
+        
+        @media (min-width: 640px) {
+            .modal-content {
+                padding: 24px;
+                width: 90%;
+                max-height: 80vh;
+                margin: 0;
+            }
+        }
+        
         .modal-overlay.show .modal-content {
             transform: scale(1);
+        }
+        
+        .admin-modal-content {
+            max-width: 1200px;
+            width: 95%;
+            max-height: 95vh;
         }
         
         .text-wrap {
@@ -135,20 +255,76 @@
             overflow-x: hidden;
         }
 
+        .theme-selector {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+
         .admin-panel {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: #1f2937;
-            color: white;
-            padding: 12px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 100;
+        }
+
+        .deleted-item {
+            opacity: 0.5;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 0, 0, 0.1) 10px,
+                rgba(255, 0, 0, 0.1) 20px
+            );
+        }
+
+        .restored-animation {
+            animation: restoreGlow 1s ease;
+        }
+
+        @keyframes restoreGlow {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        .tab-button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+            background: var(--bg-accent);
+            color: var(--text-secondary);
+        }
+
+        .tab-button.active {
+            background: var(--text-accent);
+            color: white;
+            border-color: var(--text-accent);
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body>
+    <!-- Sélecteur de thème -->
+    <div class="theme-selector">
+        <select id="themeSelector" class="themed-bg themed-border themed-text px-3 py-2 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+            <option value="light">🌞 Clair</option>
+            <option value="dark">🌙 Sombre</option>
+            <option value="red">❤️ Rouge</option>
+            <option value="blue">💙 Bleu</option>
+            <option value="green">💚 Vert</option>
+        </select>
+    </div>
+
+    <!-- Panel d'administration -->
+    <div class="admin-panel">
+        <button onclick="showAdminLogin()" class="themed-bg themed-border themed-text px-4 py-2 rounded-lg text-sm hover:opacity-80 transition-opacity">
+            🔐 Admin
+        </button>
+    </div>
+
     <!-- Notification -->
     <div id="notification" class="notification bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
         <div class="flex items-center">
@@ -159,23 +335,245 @@
         </div>
     </div>
 
+    <!-- Modal de connexion admin -->
+    <div id="adminLoginModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold themed-text">🔐 Connexion Administrateur</h2>
+                <button onclick="closeAdminLogin()" class="themed-text-secondary hover:opacity-70 text-2xl">&times;</button>
+            </div>
+            
+            <form id="adminLoginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium themed-text-secondary mb-2">Mot de passe administrateur</label>
+                    <input type="password" id="adminPassword" class="w-full px-4 py-3 themed-border themed-bg themed-text rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Entrez le mot de passe..." required>
+                </div>
+                
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeAdminLogin()" class="px-6 py-2 themed-text-secondary themed-border border rounded-lg hover:opacity-70 transition-opacity">
+                        Annuler
+                    </button>
+                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        Se connecter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Interface d'administration -->
+    <div id="adminInterface" class="modal-overlay hidden">
+        <div class="modal-content admin-modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold themed-text">🛠️ Interface d'Administration</h2>
+                <button onclick="closeAdminInterface()" class="themed-text-secondary hover:opacity-70 text-2xl">&times;</button>
+            </div>
+
+            <!-- Onglets -->
+            <div class="flex space-x-2 mb-6 overflow-x-auto">
+                <button onclick="showAdminTab('dashboard')" class="tab-button active" id="tab-dashboard">📊 Tableau de bord</button>
+                <button onclick="showAdminTab('stories')" class="tab-button" id="tab-stories">📖 Histoires</button>
+                <button onclick="showAdminTab('comments')" class="tab-button" id="tab-comments">💬 Commentaires</button>
+                <button onclick="showAdminTab('trash')" class="tab-button" id="tab-trash">🗑️ Corbeille</button>
+                <button onclick="showAdminTab('settings')" class="tab-button" id="tab-settings">⚙️ Paramètres</button>
+            </div>
+
+            <!-- Contenu des onglets -->
+            <div id="admin-dashboard" class="admin-tab-content">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="themed-bg themed-border border rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-blue-100 rounded-lg">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium themed-text-secondary">Histoires totales</p>
+                                <p class="text-2xl font-bold themed-text" id="adminTotalStories">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="themed-bg themed-border border rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-green-100 rounded-lg">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium themed-text-secondary">Commentaires</p>
+                                <p class="text-2xl font-bold themed-text" id="adminTotalComments">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="themed-bg themed-border border rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-red-100 rounded-lg">
+                                <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium themed-text-secondary">Likes totaux</p>
+                                <p class="text-2xl font-bold themed-text" id="adminTotalLikes">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="themed-bg themed-border border rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-yellow-100 rounded-lg">
+                                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium themed-text-secondary">Utilisateurs actifs</p>
+                                <p class="text-2xl font-bold themed-text" id="adminActiveUsers">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="themed-bg themed-border border rounded-lg p-4">
+                        <h3 class="text-lg font-semibold themed-text mb-4">Actions rapides</h3>
+                        <div class="space-y-2">
+                            <button onclick="markAllAsTrending()" class="w-full px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
+                                🔥 Marquer tout comme tendance
+                            </button>
+                            <button onclick="clearAllTrending()" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                                ❄️ Retirer toutes les tendances
+                            </button>
+                            <button onclick="exportData()" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                📥 Exporter les données
+                            </button>
+                            <button onclick="importData()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                📤 Importer les données
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="themed-bg themed-border border rounded-lg p-4">
+                        <h3 class="text-lg font-semibold themed-text mb-4">Historique récent</h3>
+                        <div id="recentActions" class="space-y-2 max-h-48 overflow-y-auto">
+                            <!-- Actions récentes -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="admin-stories" class="admin-tab-content hidden">
+                <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                    <input type="text" id="adminSearchInput" placeholder="Rechercher dans les histoires..." class="flex-1 px-4 py-2 themed-border themed-bg themed-text border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <select id="adminCategoryFilter" class="px-4 py-2 themed-border themed-bg themed-text border rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="">Toutes les catégories</option>
+                        <option value="Quotidien">Quotidien</option>
+                        <option value="Rencontres">Rencontres</option>
+                        <option value="Travail">Travail</option>
+                        <option value="Famille">Famille</option>
+                        <option value="Amour">Amour</option>
+                        <option value="Voyage">Voyage</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+                <div id="adminStoriesList" class="space-y-4 max-h-96 overflow-y-auto">
+                    <!-- Liste des histoires -->
+                </div>
+            </div>
+
+            <div id="admin-comments" class="admin-tab-content hidden">
+                <div class="mb-6">
+                    <input type="text" id="adminCommentsSearch" placeholder="Rechercher dans les commentaires..." class="w-full px-4 py-2 themed-border themed-bg themed-text border rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div id="adminCommentsList" class="space-y-4 max-h-96 overflow-y-auto">
+                    <!-- Liste des commentaires -->
+                </div>
+            </div>
+
+            <div id="admin-trash" class="admin-tab-content hidden">
+                <div class="mb-6">
+                    <div class="flex gap-4">
+                        <button onclick="restoreAllFromTrash()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            ♻️ Tout restaurer
+                        </button>
+                        <button onclick="emptyTrash()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                            🗑️ Vider la corbeille
+                        </button>
+                    </div>
+                </div>
+                <div id="adminTrashList" class="space-y-4 max-h-96 overflow-y-auto">
+                    <!-- Éléments supprimés -->
+                </div>
+            </div>
+
+            <div id="admin-settings" class="admin-tab-content hidden">
+                <div class="space-y-6">
+                    <div class="themed-bg themed-border border rounded-lg p-4">
+                        <h3 class="text-lg font-semibold themed-text mb-4">Paramètres généraux</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="autoModeration" class="mr-2">
+                                    <span class="themed-text">Modération automatique</span>
+                                </label>
+                            </div>
+                            <div>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="requireApproval" class="mr-2">
+                                    <span class="themed-text">Approbation requise pour les nouvelles histoires</span>
+                                </label>
+                            </div>
+                            <div>
+                                <label class="block themed-text mb-2">Limite de caractères par histoire</label>
+                                <input type="number" id="charLimit" value="1000" min="100" max="5000" class="w-full px-4 py-2 themed-border themed-bg themed-text border rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block themed-text mb-2">Limite d'histoires par jour par utilisateur</label>
+                                <input type="number" id="dailyLimit" value="5" min="1" max="50" class="w-full px-4 py-2 themed-border themed-bg themed-text border rounded-lg">
+                            </div>
+                        </div>
+                        <button onclick="saveAdminSettings()" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            💾 Sauvegarder
+                        </button>
+                    </div>
+
+                    <div class="themed-bg themed-border border rounded-lg p-4">
+                        <h3 class="text-lg font-semibold themed-text mb-4">Gestion des données</h3>
+                        <div class="space-y-2">
+                            <button onclick="clearAllData()" class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                🗑️ Effacer toutes les données
+                            </button>
+                            <button onclick="resetToDefaults()" class="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
+                                🔄 Réinitialiser aux valeurs par défaut
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal pour nouvelle histoire -->
     <div id="storyModal" class="modal-overlay">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">Partager votre histoire</h2>
-                <button onclick="closeStoryModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                <h2 class="text-2xl font-bold themed-text">✍️ Partager votre histoire</h2>
+                <button onclick="closeStoryModal()" class="themed-text-secondary hover:opacity-70 text-2xl">&times;</button>
             </div>
             
             <form id="storyForm" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Titre de votre histoire</label>
-                    <input type="text" id="storyTitle" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Donnez un titre à votre histoire..." required>
+                    <label class="block text-sm font-medium themed-text-secondary mb-2">Titre de votre histoire</label>
+                    <input type="text" id="storyTitle" class="w-full px-4 py-3 themed-border themed-bg themed-text border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Donnez un titre à votre histoire..." required>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
-                    <select id="storyCategory" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <label class="block text-sm font-medium themed-text-secondary mb-2">Catégorie</label>
+                    <select id="storyCategory" class="w-full px-4 py-3 themed-border themed-bg themed-text border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="Quotidien">Quotidien</option>
                         <option value="Rencontres">Rencontres</option>
                         <option value="Travail">Travail</option>
@@ -187,15 +585,15 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Votre histoire</label>
-                    <textarea id="storyContent" rows="6" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" placeholder="Racontez votre histoire de manière anonyme..." required></textarea>
-                    <div class="text-sm text-gray-500 mt-1">
+                    <label class="block text-sm font-medium themed-text-secondary mb-2">Votre histoire</label>
+                    <textarea id="storyContent" rows="6" class="w-full px-4 py-3 themed-border themed-bg themed-text border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" placeholder="Racontez votre histoire de manière anonyme..." required></textarea>
+                    <div class="text-sm themed-text-secondary mt-1">
                         <span id="charCount">0</span>/1000 caractères
                     </div>
                 </div>
                 
                 <div class="flex justify-end space-x-3 pt-4">
-                    <button type="button" onclick="closeStoryModal()" class="px-6 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                    <button type="button" onclick="closeStoryModal()" class="px-6 py-2 themed-text-secondary themed-border border rounded-lg hover:opacity-70 transition-opacity">
                         Annuler
                     </button>
                     <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
@@ -206,26 +604,26 @@
         </div>
     </div>
 
-    <div class="container mx-auto px-4 py-8 max-w-4xl">
+    <div class="container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-4xl">
         <!-- Header -->
-        <header class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-gray-800 mb-4">📖 Histoires Anonymes</h1>
-            <p class="text-lg text-gray-600 max-w-2xl mx-auto">Partagez vos expériences, vos émotions et vos réflexions de manière anonyme. Chaque histoire compte.</p>
+        <header class="text-center mb-8 sm:mb-12">
+            <h1 class="text-2xl sm:text-4xl font-bold themed-text mb-3 sm:mb-4">📖 Histoires Anonymes</h1>
+            <p class="text-base sm:text-lg themed-text-secondary max-w-2xl mx-auto px-2">Plateforme indépendante pour partager vos expériences, émotions et réflexions de manière anonyme. Chaque histoire compte.</p>
         </header>
 
         <!-- Actions et recherche -->
-        <div class="flex flex-col md:flex-row gap-4 mb-8">
-            <div class="flex-1">
-                <div class="relative">
-                    <input type="text" id="searchInput" placeholder="Rechercher dans les histoires..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <svg class="absolute left-3 top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                </div>
+        <div class="space-y-4 mb-8">
+            <!-- Barre de recherche -->
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="Rechercher dans les histoires..." class="w-full pl-10 pr-4 py-3 themed-border themed-bg themed-text border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base">
+                <svg class="absolute left-3 top-3.5 h-5 w-5 themed-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
             </div>
             
-            <div class="flex gap-3">
-                <select id="categoryFilter" class="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <!-- Filtres et bouton nouvelle histoire -->
+            <div class="flex flex-col sm:flex-row gap-3">
+                <select id="categoryFilter" class="flex-1 px-3 py-3 themed-border themed-bg themed-text border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base">
                     <option value="">Toutes les catégories</option>
                     <option value="Quotidien">Quotidien</option>
                     <option value="Rencontres">Rencontres</option>
@@ -236,21 +634,22 @@
                     <option value="Autre">Autre</option>
                 </select>
                 
-                <select id="sortFilter" class="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <select id="sortFilter" class="flex-1 px-3 py-3 themed-border themed-bg themed-text border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base">
                     <option value="recent">Plus récentes</option>
                     <option value="popular">Plus populaires</option>
                     <option value="trending">Tendances</option>
                 </select>
-                
-                <button onclick="openStoryModal()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium whitespace-nowrap">
-                    ✍️ Nouvelle histoire
-                </button>
             </div>
+            
+            <!-- Bouton nouvelle histoire en pleine largeur sur mobile -->
+            <button onclick="openStoryModal()" class="w-full bg-blue-600 text-white px-6 py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-base">
+                ✍️ Nouvelle histoire
+            </button>
         </div>
 
         <!-- Statistiques -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            <div class="themed-bg themed-border border p-6 rounded-xl shadow-sm">
                 <div class="flex items-center">
                     <div class="p-3 bg-blue-100 rounded-lg">
                         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -258,13 +657,13 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Histoires partagées</p>
-                        <p class="text-2xl font-bold text-gray-900" id="totalStories">0</p>
+                        <p class="text-sm font-medium themed-text-secondary">Histoires partagées</p>
+                        <p class="text-2xl font-bold themed-text" id="totalStories">0</p>
                     </div>
                 </div>
             </div>
             
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div class="themed-bg themed-border border p-6 rounded-xl shadow-sm">
                 <div class="flex items-center">
                     <div class="p-3 bg-red-100 rounded-lg">
                         <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
@@ -272,13 +671,13 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Likes totaux</p>
-                        <p class="text-2xl font-bold text-gray-900" id="totalLikes">0</p>
+                        <p class="text-sm font-medium themed-text-secondary">Likes totaux</p>
+                        <p class="text-2xl font-bold themed-text" id="totalLikes">0</p>
                     </div>
                 </div>
             </div>
             
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div class="themed-bg themed-border border p-6 rounded-xl shadow-sm">
                 <div class="flex items-center">
                     <div class="p-3 bg-green-100 rounded-lg">
                         <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -286,8 +685,8 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Commentaires</p>
-                        <p class="text-2xl font-bold text-gray-900" id="totalComments">0</p>
+                        <p class="text-sm font-medium themed-text-secondary">Commentaires</p>
+                        <p class="text-2xl font-bold themed-text" id="totalComments">0</p>
                     </div>
                 </div>
             </div>
@@ -300,23 +699,32 @@
 
         <!-- Message si aucune histoire -->
         <div id="noStoriesMessage" class="text-center py-12 hidden">
-            <div class="text-gray-400 text-6xl mb-4">📖</div>
-            <h3 class="text-xl font-medium text-gray-600 mb-2">Aucune histoire trouvée</h3>
-            <p class="text-gray-500">Essayez de modifier vos critères de recherche ou soyez le premier à partager une histoire !</p>
+            <div class="themed-text-secondary text-6xl mb-4">📖</div>
+            <h3 class="text-xl font-medium themed-text mb-2">Aucune histoire trouvée</h3>
+            <p class="themed-text-secondary">Essayez de modifier vos critères de recherche ou soyez le premier à partager une histoire !</p>
         </div>
     </div>
 
-    <!-- Panel d'administration -->
-    <div class="admin-panel">
-        <div class="text-xs mb-2">Histoires: <span id="adminStoryCount">0</span></div>
-        <button onclick="clearAllData()" class="text-xs bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-white">
-            Effacer tout
-        </button>
-    </div>
-
     <script>
-        // Stockage global partagé pour toutes les histoires
-        let stories = JSON.parse(localStorage.getItem('globalStories')) || [
+        // Variables globales
+        let stories = [];
+        let deletedItems = [];
+        let actionHistory = [];
+        let currentUser = "Utilisateur" + Math.floor(Math.random() * 1000);
+        let isAdmin = false;
+        let adminPassword = "admin123";
+        let searchTerm = '';
+        let selectedCategory = '';
+        let sortBy = 'recent';
+        let adminSettings = {
+            autoModeration: false,
+            requireApproval: false,
+            charLimit: 1000,
+            dailyLimit: 5
+        };
+
+        // Initialisation des données par défaut
+        const defaultStories = [
             {
                 id: 1,
                 title: "Une rencontre inattendue",
@@ -329,7 +737,8 @@
                     { id: 2, author: "Lecteur2", content: "J'ai vécu la même chose la semaine dernière !", timestamp: new Date(Date.now() - 30 * 60 * 1000) }
                 ],
                 trending: true,
-                category: "Rencontres"
+                category: "Rencontres",
+                deleted: false
             },
             {
                 id: 2,
@@ -342,7 +751,8 @@
                     { id: 3, author: "Lecteur3", content: "Bravo pour ce courage ! Vous nous inspirez.", timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) }
                 ],
                 trending: false,
-                category: "Travail"
+                category: "Travail",
+                deleted: false
             },
             {
                 id: 3,
@@ -353,47 +763,123 @@
                 likes: 67,
                 comments: [],
                 trending: true,
-                category: "Quotidien"
+                category: "Quotidien",
+                deleted: false
             }
         ];
 
-        let currentUser = "Utilisateur" + Math.floor(Math.random() * 1000);
-        let searchTerm = '';
-        let selectedCategory = '';
-        let sortBy = 'recent';
+        // Gestion des thèmes
+        function initTheme() {
+            const savedTheme = localStorage.getItem('selectedTheme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.getElementById('themeSelector').value = savedTheme;
+        }
 
-        // Sauvegarder les histoires dans le stockage global
-        function saveStories() {
+        function changeTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('selectedTheme', theme);
+            addToHistory('theme_change', `Thème changé vers ${theme}`);
+        }
+
+        // Gestion de l'historique des actions
+        function addToHistory(action, description, data = null) {
+            actionHistory.unshift({
+                id: Date.now(),
+                action: action,
+                description: description,
+                timestamp: new Date(),
+                data: data
+            });
+            
+            // Garder seulement les 50 dernières actions
+            if (actionHistory.length > 50) {
+                actionHistory = actionHistory.slice(0, 50);
+            }
+            
+            saveData();
+            updateRecentActions();
+        }
+
+        function updateRecentActions() {
+            const container = document.getElementById('recentActions');
+            if (!container) return;
+            
+            container.innerHTML = actionHistory.slice(0, 10).map(action => `
+                <div class="text-sm themed-text-secondary">
+                    <div class="font-medium">${action.description}</div>
+                    <div class="text-xs opacity-70">${formatTimeAgo(action.timestamp)}</div>
+                </div>
+            `).join('');
+        }
+
+        // Stockage et chargement des données
+        function saveData() {
             localStorage.setItem('globalStories', JSON.stringify(stories));
+            localStorage.setItem('deletedItems', JSON.stringify(deletedItems));
+            localStorage.setItem('actionHistory', JSON.stringify(actionHistory));
+            localStorage.setItem('adminSettings', JSON.stringify(adminSettings));
             updateStats();
         }
 
-        // Charger les histoires depuis le stockage global
-        function loadStories() {
+        function loadData() {
             const savedStories = localStorage.getItem('globalStories');
+            const savedDeleted = localStorage.getItem('deletedItems');
+            const savedHistory = localStorage.getItem('actionHistory');
+            const savedSettings = localStorage.getItem('adminSettings');
+            
             if (savedStories) {
                 stories = JSON.parse(savedStories);
-                // Convertir les timestamps en objets Date
                 stories.forEach(story => {
                     story.timestamp = new Date(story.timestamp);
                     story.comments.forEach(comment => {
                         comment.timestamp = new Date(comment.timestamp);
                     });
                 });
+            } else {
+                stories = defaultStories;
             }
+            
+            if (savedDeleted) {
+                deletedItems = JSON.parse(savedDeleted);
+                deletedItems.forEach(item => {
+                    item.deletedAt = new Date(item.deletedAt);
+                    if (item.timestamp) item.timestamp = new Date(item.timestamp);
+                });
+            }
+            
+            if (savedHistory) {
+                actionHistory = JSON.parse(savedHistory);
+                actionHistory.forEach(action => {
+                    action.timestamp = new Date(action.timestamp);
+                });
+            }
+            
+            if (savedSettings) {
+                adminSettings = JSON.parse(savedSettings);
+            }
+            
             updateStats();
             renderStories();
         }
 
         function updateStats() {
-            const totalStories = stories.length;
-            const totalLikes = stories.reduce((sum, story) => sum + story.likes, 0);
-            const totalComments = stories.reduce((sum, story) => sum + story.comments.length, 0);
+            const activeStories = stories.filter(story => !story.deleted);
+            const totalStories = activeStories.length;
+            const totalLikes = activeStories.reduce((sum, story) => sum + story.likes, 0);
+            const totalComments = activeStories.reduce((sum, story) => sum + story.comments.filter(c => !c.deleted).length, 0);
+            const uniqueAuthors = [...new Set(activeStories.map(story => story.author))].length;
             
             document.getElementById('totalStories').textContent = totalStories;
             document.getElementById('totalLikes').textContent = totalLikes;
             document.getElementById('totalComments').textContent = totalComments;
-            document.getElementById('adminStoryCount').textContent = totalStories;
+            
+            // Stats admin
+            if (document.getElementById('adminTotalStories')) {
+                document.getElementById('adminTotalStories').textContent = totalStories;
+                document.getElementById('adminTotalLikes').textContent = totalLikes;
+                document.getElementById('adminTotalComments').textContent = totalComments;
+                document.getElementById('adminActiveUsers').textContent = uniqueAuthors;
+            }
         }
 
         function formatTimeAgo(date) {
@@ -415,6 +901,8 @@
 
         function getFilteredAndSortedStories() {
             let filteredStories = stories.filter(story => {
+                if (story.deleted) return false;
+                
                 const matchesSearch = !searchTerm || 
                     story.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     story.content.toLowerCase().includes(searchTerm.toLowerCase());
@@ -424,7 +912,6 @@
                 return matchesSearch && matchesCategory;
             });
 
-            // Tri
             filteredStories.sort((a, b) => {
                 switch(sortBy) {
                     case 'popular':
@@ -454,72 +941,83 @@
             noStoriesMessage.classList.add('hidden');
             
             container.innerHTML = filteredStories.map(story => `
-                <article class="story-card bg-white rounded-xl p-6 shadow-sm border border-gray-100 ${story.trending ? 'trending' : ''} fade-in">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-3 mb-2">
-                                <h2 class="story-title text-xl font-semibold text-gray-800">${highlightSearchTerm(story.title, searchTerm)}</h2>
-                                ${story.trending ? '<span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full font-medium">🔥 Tendance</span>' : ''}
-                            </div>
-                            <div class="flex items-center text-sm text-gray-500 gap-4">
-                                <span>👤 ${story.author}</span>
-                                <span>🕒 ${formatTimeAgo(story.timestamp)}</span>
-                                <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs">${story.category}</span>
+                <article class="story-card themed-bg themed-border border rounded-xl p-4 sm:p-6 shadow-sm ${story.trending ? 'trending' : ''} fade-in">
+                    <div class="mb-4">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                            <div class="flex-1">
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                                    <h2 class="story-title text-lg sm:text-xl font-semibold themed-text leading-tight">${highlightSearchTerm(story.title, searchTerm)}</h2>
+                                    ${story.trending ? '<span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full font-medium self-start">🔥 Tendance</span>' : ''}
+                                </div>
+                                <div class="flex flex-wrap items-center text-sm themed-text-secondary gap-2 sm:gap-4">
+                                    <span>👤 ${story.author}</span>
+                                    <span>🕒 ${formatTimeAgo(story.timestamp)}</span>
+                                    <span class="themed-bg-accent themed-text px-2 py-1 rounded-full text-xs">${story.category}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="story-content text-gray-700 mb-4 leading-relaxed">${highlightSearchTerm(story.content, searchTerm)}</div>
+                    <div class="story-content themed-text mb-4 leading-relaxed">${highlightSearchTerm(story.content, searchTerm)}</div>
                     
-                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 themed-border border-t">
                         <div class="flex items-center gap-4">
-                            <button onclick="toggleLike(${story.id})" class="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors">
+                            <button onclick="toggleLike(${story.id})" class="flex items-center gap-2 themed-text-secondary hover:text-red-500 transition-colors touch-manipulation">
                                 <svg class="w-5 h-5 ${story.liked ? 'text-red-500 fill-current' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                                 </svg>
                                 <span>${story.likes}</span>
                             </button>
                             
-                            <button onclick="toggleComments(${story.id})" class="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors">
+                            <button onclick="toggleComments(${story.id})" class="flex items-center gap-2 themed-text-secondary hover:text-blue-500 transition-colors touch-manipulation">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                                 </svg>
-                                <span>${story.comments.length}</span>
+                                <span>${story.comments.filter(c => !c.deleted).length}</span>
                             </button>
                         </div>
                         
-                        <button onclick="shareStory(${story.id})" class="text-gray-600 hover:text-green-500 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
-                            </svg>
-                        </button>
-                        
-                        ${story.author === currentUser || isAdmin ? `
-                            <button onclick="deleteStory(${story.id})" class="text-gray-600 hover:text-red-500 transition-colors ml-2">
+                        <div class="flex items-center gap-2">
+                            <button onclick="shareStory(${story.id})" class="themed-text-secondary hover:text-green-500 transition-colors p-2 touch-manipulation">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
                                 </svg>
                             </button>
-                        ` : ''}
+                            
+                            ${story.author === currentUser || isAdmin ? `
+                                <button onclick="deleteStory(${story.id})" class="themed-text-secondary hover:text-red-500 transition-colors p-2 touch-manipulation">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            ` : ''}
+                        </div>
                     </div>
                     
                     <!-- Section commentaires -->
                     <div id="comments-${story.id}" class="comment-section mt-4">
                         <div class="space-y-3 mb-4">
-                            ${story.comments.map(comment => `
-                                <div class="bg-gray-50 p-3 rounded-lg">
+                            ${story.comments.filter(c => !c.deleted).map(comment => `
+                                <div class="themed-bg-accent p-3 rounded-lg">
                                     <div class="flex justify-between items-start mb-1">
-                                        <span class="font-medium text-sm text-gray-700">${comment.author}</span>
-                                        <span class="text-xs text-gray-500">${formatTimeAgo(comment.timestamp)}</span>
+                                        <span class="font-medium text-sm themed-text">${comment.author}</span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs themed-text-secondary">${formatTimeAgo(comment.timestamp)}</span>
+                                            ${comment.author === currentUser || isAdmin ? `
+                                                <button onclick="deleteComment(${story.id}, ${comment.id})" class="text-xs themed-text-secondary hover:text-red-500 transition-colors">
+                                                    🗑️
+                                                </button>
+                                            ` : ''}
+                                        </div>
                                     </div>
-                                    <p class="comment-text text-gray-600 text-sm">${comment.content}</p>
+                                    <p class="comment-text themed-text-secondary text-sm">${comment.content}</p>
                                 </div>
                             `).join('')}
                         </div>
                         
-                        <div class="flex gap-2">
-                            <input type="text" id="comment-input-${story.id}" placeholder="Ajouter un commentaire..." class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <button onclick="addComment(${story.id})" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" id="comment-input-${story.id}" placeholder="Ajouter un commentaire..." class="flex-1 px-3 py-3 themed-border themed-bg themed-text border rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <button onclick="addComment(${story.id})" class="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors text-base font-medium touch-manipulation">
                                 Publier
                             </button>
                         </div>
@@ -528,18 +1026,19 @@
             `).join('');
         }
 
+        // Fonctions d'interaction
         function toggleLike(storyId) {
             const story = stories.find(s => s.id === storyId);
-            if (story) {
+            if (story && !story.deleted) {
                 story.likes += story.liked ? -1 : 1;
                 story.liked = !story.liked;
                 
-                // Animation
                 const button = event.currentTarget;
                 button.classList.add('like-animation');
                 setTimeout(() => button.classList.remove('like-animation'), 300);
                 
-                saveStories();
+                addToHistory('like', `Histoire "${story.title}" ${story.liked ? 'likée' : 'unlikée'}`);
+                saveData();
                 renderStories();
             }
         }
@@ -555,21 +1054,22 @@
             
             if (content) {
                 const story = stories.find(s => s.id === storyId);
-                if (story) {
+                if (story && !story.deleted) {
                     const newComment = {
                         id: Date.now(),
                         author: currentUser,
                         content: content,
-                        timestamp: new Date()
+                        timestamp: new Date(),
+                        deleted: false
                     };
                     
                     story.comments.push(newComment);
                     input.value = '';
                     
-                    saveStories();
+                    addToHistory('comment_add', `Commentaire ajouté sur "${story.title}"`);
+                    saveData();
                     renderStories();
                     
-                    // Rouvrir la section commentaires
                     setTimeout(() => {
                         document.getElementById(`comments-${storyId}`).classList.add('open');
                     }, 100);
@@ -579,23 +1079,85 @@
             }
         }
 
-        function shareStory(storyId) {
-            const story = stories.find(s => s.id === storyId);
-            if (story && navigator.share) {
-                navigator.share({
-                    title: story.title,
-                    text: story.content,
-                    url: window.location.href
-                });
-            } else {
-                // Fallback pour copier dans le presse-papiers
-                const text = `${story.title}\n\n${story.content}\n\nLu sur Histoires Anonymes`;
-                navigator.clipboard.writeText(text).then(() => {
-                    showNotification('Histoire copiée dans le presse-papiers !');
-                });
+        function deleteComment(storyId, commentId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) {
+                const story = stories.find(s => s.id === storyId);
+                if (story) {
+                    const comment = story.comments.find(c => c.id === commentId);
+                    if (comment && (comment.author === currentUser || isAdmin)) {
+                        comment.deleted = true;
+                        comment.deletedAt = new Date();
+                        comment.deletedBy = isAdmin ? 'admin' : currentUser;
+                        
+                        // Ajouter à la corbeille
+                        deletedItems.push({
+                            type: 'comment',
+                            data: {...comment},
+                            storyId: storyId,
+                            deletedAt: new Date(),
+                            deletedBy: isAdmin ? 'admin' : currentUser
+                        });
+                        
+                        addToHistory('comment_delete', `Commentaire supprimé sur "${story.title}"`);
+                        saveData();
+                        renderStories();
+                        
+                        setTimeout(() => {
+                            document.getElementById(`comments-${storyId}`).classList.add('open');
+                        }, 100);
+                        
+                        showNotification('Commentaire supprimé');
+                    }
+                }
             }
         }
 
+        function shareStory(storyId) {
+            const story = stories.find(s => s.id === storyId);
+            if (story && !story.deleted) {
+                if (navigator.share) {
+                    navigator.share({
+                        title: story.title,
+                        text: story.content,
+                        url: window.location.href
+                    });
+                } else {
+                    const text = `${story.title}\n\n${story.content}\n\nLu sur Histoires Anonymes`;
+                    navigator.clipboard.writeText(text).then(() => {
+                        showNotification('Histoire copiée dans le presse-papiers !');
+                    });
+                }
+                addToHistory('share', `Histoire "${story.title}" partagée`);
+            }
+        }
+
+        function deleteStory(storyId) {
+            const story = stories.find(s => s.id === storyId);
+            if (story && (story.author === currentUser || isAdmin)) {
+                if (confirm('Êtes-vous sûr de vouloir supprimer cette histoire ?')) {
+                    story.deleted = true;
+                    story.deletedAt = new Date();
+                    story.deletedBy = isAdmin ? 'admin' : currentUser;
+                    
+                    // Ajouter à la corbeille
+                    deletedItems.push({
+                        type: 'story',
+                        data: {...story},
+                        deletedAt: new Date(),
+                        deletedBy: isAdmin ? 'admin' : currentUser
+                    });
+                    
+                    addToHistory('story_delete', `Histoire "${story.title}" supprimée`);
+                    saveData();
+                    renderStories();
+                    showNotification('Histoire supprimée');
+                }
+            } else {
+                showNotification('Vous ne pouvez supprimer que vos propres histoires');
+            }
+        }
+
+        // Fonctions de modal
         function openStoryModal() {
             document.getElementById('storyModal').classList.add('show');
             document.getElementById('storyTitle').focus();
@@ -607,9 +1169,13 @@
             document.getElementById('charCount').textContent = '0';
         }
 
-        function showNotification(message) {
+        function showNotification(message, type = 'success') {
             const notification = document.getElementById('notification');
             const notificationText = document.getElementById('notificationText');
+            
+            notification.className = `notification px-6 py-3 rounded-lg shadow-lg ${
+                type === 'error' ? 'bg-red-500' : 'bg-green-500'
+            } text-white`;
             
             notificationText.textContent = message;
             notification.classList.add('show');
@@ -618,78 +1184,6 @@
                 notification.classList.remove('show');
             }, 3000);
         }
-
-        function clearAllData() {
-            if (confirm('Êtes-vous sûr de vouloir effacer toutes les histoires ? Cette action est irréversible.')) {
-                localStorage.removeItem('globalStories');
-                stories = [];
-                saveStories();
-                renderStories();
-                showNotification('Toutes les données ont été effacées');
-            }
-        }
-
-        // Gestionnaires d'événements
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            searchTerm = e.target.value;
-            renderStories();
-        });
-
-        document.getElementById('categoryFilter').addEventListener('change', (e) => {
-            selectedCategory = e.target.value;
-            renderStories();
-        });
-
-        document.getElementById('sortFilter').addEventListener('change', (e) => {
-            sortBy = e.target.value;
-            renderStories();
-        });
-
-        document.getElementById('storyContent').addEventListener('input', (e) => {
-            const charCount = e.target.value.length;
-            document.getElementById('charCount').textContent = charCount;
-            
-            if (charCount > 1000) {
-                e.target.value = e.target.value.substring(0, 1000);
-                document.getElementById('charCount').textContent = '1000';
-            }
-        });
-
-        document.getElementById('storyForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const title = document.getElementById('storyTitle').value.trim();
-            const content = document.getElementById('storyContent').value.trim();
-            const category = document.getElementById('storyCategory').value;
-            
-            if (title && content) {
-                const newStory = {
-                    id: Date.now(),
-                    title: title,
-                    content: content,
-                    author: currentUser,
-                    timestamp: new Date(),
-                    likes: 0,
-                    comments: [],
-                    trending: false,
-                    category: category,
-                    liked: false
-                };
-                
-                stories.unshift(newStory);
-                saveStories();
-                renderStories();
-                closeStoryModal();
-                showNotification('Votre histoire a été publiée et est maintenant visible par tous !');
-            }
-        });
-
-        // Fermer le modal en cliquant à l'extérieur
-        document.getElementById('storyModal').addEventListener('click', (e) => {
-            if (e.target.id === 'storyModal') {
-                closeStoryModal();
-            }
-        });
 
         // Fonctions d'administration
         function showAdminLogin() {
@@ -703,31 +1197,67 @@
         }
 
         function showAdminInterface() {
+            document.getElementById('adminInterface').classList.remove('show');
             document.getElementById('adminInterface').classList.remove('hidden');
+            document.getElementById('adminInterface').classList.add('show');
             updateAdminStats();
             renderAdminStories();
+            renderAdminComments();
+            renderTrash();
+            updateRecentActions();
+            loadAdminSettings();
         }
 
         function closeAdminInterface() {
+            document.getElementById('adminInterface').classList.remove('show');
             document.getElementById('adminInterface').classList.add('hidden');
             isAdmin = false;
         }
 
+        function showAdminTab(tabName) {
+            // Masquer tous les onglets
+            document.querySelectorAll('.admin-tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Désactiver tous les boutons d'onglet
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Afficher l'onglet sélectionné
+            document.getElementById(`admin-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            // Mettre à jour le contenu selon l'onglet
+            switch(tabName) {
+                case 'stories':
+                    renderAdminStories();
+                    break;
+                case 'comments':
+                    renderAdminComments();
+                    break;
+                case 'trash':
+                    renderTrash();
+                    break;
+                case 'dashboard':
+                    updateAdminStats();
+                    updateRecentActions();
+                    break;
+            }
+        }
+
         function updateAdminStats() {
-            const totalStories = stories.length;
-            const totalLikes = stories.reduce((sum, story) => sum + story.likes, 0);
-            const totalComments = stories.reduce((sum, story) => sum + story.comments.length, 0);
-            const uniqueAuthors = [...new Set(stories.map(story => story.author))].length;
-            const trendingCount = stories.filter(story => story.trending).length;
-            const popularCount = stories.filter(story => story.likes > 20).length;
+            const activeStories = stories.filter(story => !story.deleted);
+            const totalStories = activeStories.length;
+            const totalLikes = activeStories.reduce((sum, story) => sum + story.likes, 0);
+            const totalComments = activeStories.reduce((sum, story) => sum + story.comments.filter(c => !c.deleted).length, 0);
+            const uniqueAuthors = [...new Set(activeStories.map(story => story.author))].length;
 
             document.getElementById('adminTotalStories').textContent = totalStories;
             document.getElementById('adminTotalLikes').textContent = totalLikes;
             document.getElementById('adminTotalComments').textContent = totalComments;
             document.getElementById('adminActiveUsers').textContent = uniqueAuthors;
-            document.getElementById('adminAuthors').textContent = uniqueAuthors;
-            document.getElementById('adminTrendingCount').textContent = trendingCount;
-            document.getElementById('adminPopularCount').textContent = popularCount;
         }
 
         function renderAdminStories() {
@@ -736,6 +1266,8 @@
             const categoryFilter = document.getElementById('adminCategoryFilter').value;
 
             let filteredStories = stories.filter(story => {
+                if (story.deleted) return false;
+                
                 const matchesSearch = !searchTerm || 
                     story.title.toLowerCase().includes(searchTerm) ||
                     story.content.toLowerCase().includes(searchTerm) ||
@@ -747,14 +1279,14 @@
             });
 
             container.innerHTML = filteredStories.map(story => `
-                <div class="bg-gray-700 p-4 rounded-lg">
+                <div class="themed-bg-accent p-4 rounded-lg">
                     <div class="flex justify-between items-start mb-2">
                         <div class="flex-1">
-                            <h3 class="font-semibold text-white">${story.title}</h3>
-                            <p class="text-sm text-gray-300">Par: ${story.author} • ${formatTimeAgo(story.timestamp)} • ${story.category}</p>
+                            <h3 class="font-semibold themed-text">${story.title}</h3>
+                            <p class="text-sm themed-text-secondary">Par: ${story.author} • ${formatTimeAgo(story.timestamp)} • ${story.category}</p>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="toggleStoryTrending(${story.id})" class="px-2 py-1 text-xs rounded ${story.trending ? 'bg-yellow-600 text-white' : 'bg-gray-600 text-gray-300'}">
+                            <button onclick="toggleStoryTrending(${story.id})" class="px-2 py-1 text-xs rounded ${story.trending ? 'bg-yellow-600 text-white' : 'themed-bg-accent themed-text-secondary'}">
                                 ${story.trending ? 'Tendance' : 'Normal'}
                             </button>
                             <button onclick="deleteStoryAdmin(${story.id})" class="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700">
@@ -762,32 +1294,206 @@
                             </button>
                         </div>
                     </div>
-                    <p class="text-gray-300 text-sm mb-2">${story.content.substring(0, 100)}${story.content.length > 100 ? '...' : ''}</p>
-                    <div class="flex gap-4 text-xs text-gray-400">
+                    <p class="themed-text-secondary text-sm mb-2">${story.content.substring(0, 100)}${story.content.length > 100 ? '...' : ''}</p>
+                    <div class="flex gap-4 text-xs themed-text-secondary">
                         <span>❤️ ${story.likes} likes</span>
-                        <span>💬 ${story.comments.length} commentaires</span>
+                        <span>💬 ${story.comments.filter(c => !c.deleted).length} commentaires</span>
                     </div>
                 </div>
             `).join('');
         }
 
-        function deleteStory(storyId) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer cette histoire ?')) {
-                stories = stories.filter(story => story.id !== storyId);
-                saveStories();
-                renderStories();
-                showNotification('Histoire supprimée');
+        function renderAdminComments() {
+            const container = document.getElementById('adminCommentsList');
+            const searchTerm = document.getElementById('adminCommentsSearch').value.toLowerCase();
+
+            let allComments = [];
+            stories.forEach(story => {
+                if (!story.deleted) {
+                    story.comments.forEach(comment => {
+                        if (!comment.deleted) {
+                            allComments.push({
+                                ...comment,
+                                storyTitle: story.title,
+                                storyId: story.id
+                            });
+                        }
+                    });
+                }
+            });
+
+            let filteredComments = allComments.filter(comment => {
+                return !searchTerm || 
+                    comment.content.toLowerCase().includes(searchTerm) ||
+                    comment.author.toLowerCase().includes(searchTerm) ||
+                    comment.storyTitle.toLowerCase().includes(searchTerm);
+            });
+
+            container.innerHTML = filteredComments.map(comment => `
+                <div class="themed-bg-accent p-4 rounded-lg">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex-1">
+                            <h4 class="font-medium themed-text">Sur: ${comment.storyTitle}</h4>
+                            <p class="text-sm themed-text-secondary">Par: ${comment.author} • ${formatTimeAgo(comment.timestamp)}</p>
+                        </div>
+                        <button onclick="deleteCommentAdmin(${comment.storyId}, ${comment.id})" class="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700">
+                            Supprimer
+                        </button>
+                    </div>
+                    <p class="themed-text text-sm">${comment.content}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderTrash() {
+            const container = document.getElementById('adminTrashList');
+            
+            container.innerHTML = deletedItems.map(item => `
+                <div class="themed-bg-accent p-4 rounded-lg deleted-item">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex-1">
+                            <h4 class="font-medium themed-text">
+                                ${item.type === 'story' ? '📖' : '💬'} 
+                                ${item.type === 'story' ? item.data.title : `Commentaire sur "${stories.find(s => s.id === item.storyId)?.title || 'Histoire supprimée'}"`}
+                            </h4>
+                            <p class="text-sm themed-text-secondary">
+                                Supprimé par: ${item.deletedBy} • ${formatTimeAgo(item.deletedAt)}
+                            </p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="restoreItem(${deletedItems.indexOf(item)})" class="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700">
+                                Restaurer
+                            </button>
+                            <button onclick="permanentDelete(${deletedItems.indexOf(item)})" class="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700">
+                                Supprimer définitivement
+                            </button>
+                        </div>
+                    </div>
+                    <p class="themed-text-secondary text-sm">${item.data.content ? item.data.content.substring(0, 100) : ''}${item.data.content && item.data.content.length > 100 ? '...' : ''}</p>
+                </div>
+            `).join('');
+        }
+
+        function restoreItem(index) {
+            const item = deletedItems[index];
+            if (!item) return;
+            
+            if (item.type === 'story') {
+                const story = stories.find(s => s.id === item.data.id);
+                if (story) {
+                    story.deleted = false;
+                    delete story.deletedAt;
+                    delete story.deletedBy;
+                    
+                    // Animation de restauration
+                    setTimeout(() => {
+                        const storyElement = document.querySelector(`[data-story-id="${story.id}"]`);
+                        if (storyElement) {
+                            storyElement.classList.add('restored-animation');
+                        }
+                    }, 100);
+                }
+            } else if (item.type === 'comment') {
+                const story = stories.find(s => s.id === item.storyId);
+                if (story) {
+                    const comment = story.comments.find(c => c.id === item.data.id);
+                    if (comment) {
+                        comment.deleted = false;
+                        delete comment.deletedAt;
+                        delete comment.deletedBy;
+                    }
+                }
+            }
+            
+            deletedItems.splice(index, 1);
+            addToHistory('restore', `${item.type === 'story' ? 'Histoire' : 'Commentaire'} "${item.data.title || item.data.content.substring(0, 30)}..." restauré`);
+            saveData();
+            renderStories();
+            renderTrash();
+            showNotification(`${item.type === 'story' ? 'Histoire' : 'Commentaire'} restauré avec succès !`);
+        }
+
+        function permanentDelete(index) {
+            if (confirm('Supprimer définitivement cet élément ? Cette action est irréversible.')) {
+                const item = deletedItems[index];
+                deletedItems.splice(index, 1);
+                addToHistory('permanent_delete', `${item.type === 'story' ? 'Histoire' : 'Commentaire'} supprimé définitivement`);
+                saveData();
+                renderTrash();
+                showNotification('Élément supprimé définitivement');
+            }
+        }
+
+        function restoreAllFromTrash() {
+            if (confirm('Restaurer tous les éléments de la corbeille ?')) {
+                deletedItems.forEach((item, index) => {
+                    restoreItem(index);
+                });
+                showNotification('Tous les éléments ont été restaurés !');
+            }
+        }
+
+        function emptyTrash() {
+            if (confirm('Vider définitivement la corbeille ? Cette action est irréversible.')) {
+                deletedItems = [];
+                addToHistory('empty_trash', 'Corbeille vidée');
+                saveData();
+                renderTrash();
+                showNotification('Corbeille vidée');
             }
         }
 
         function deleteStoryAdmin(storyId) {
-            if (confirm('Supprimer définitivement cette histoire ?')) {
-                stories = stories.filter(story => story.id !== storyId);
-                saveStories();
-                renderStories();
-                renderAdminStories();
-                updateAdminStats();
-                showNotification('Histoire supprimée par l\'administrateur');
+            if (confirm('Supprimer cette histoire ?')) {
+                const story = stories.find(s => s.id === storyId);
+                if (story) {
+                    story.deleted = true;
+                    story.deletedAt = new Date();
+                    story.deletedBy = 'admin';
+                    
+                    deletedItems.push({
+                        type: 'story',
+                        data: {...story},
+                        deletedAt: new Date(),
+                        deletedBy: 'admin'
+                    });
+                    
+                    addToHistory('story_delete_admin', `Histoire "${story.title}" supprimée par l'admin`);
+                    saveData();
+                    renderStories();
+                    renderAdminStories();
+                    updateAdminStats();
+                    showNotification('Histoire supprimée');
+                }
+            }
+        }
+
+        function deleteCommentAdmin(storyId, commentId) {
+            if (confirm('Supprimer ce commentaire ?')) {
+                const story = stories.find(s => s.id === storyId);
+                if (story) {
+                    const comment = story.comments.find(c => c.id === commentId);
+                    if (comment) {
+                        comment.deleted = true;
+                        comment.deletedAt = new Date();
+                        comment.deletedBy = 'admin';
+                        
+                        deletedItems.push({
+                            type: 'comment',
+                            data: {...comment},
+                            storyId: storyId,
+                            deletedAt: new Date(),
+                            deletedBy: 'admin'
+                        });
+                        
+                        addToHistory('comment_delete_admin', `Commentaire supprimé par l'admin`);
+                        saveData();
+                        renderStories();
+                        renderAdminComments();
+                        updateAdminStats();
+                        showNotification('Commentaire supprimé');
+                    }
+                }
             }
         }
 
@@ -795,7 +1501,8 @@
             const story = stories.find(s => s.id === storyId);
             if (story) {
                 story.trending = !story.trending;
-                saveStories();
+                addToHistory('trending_toggle', `Histoire "${story.title}" ${story.trending ? 'marquée' : 'retirée'} des tendances`);
+                saveData();
                 renderStories();
                 renderAdminStories();
                 updateAdminStats();
@@ -805,8 +1512,11 @@
 
         function markAllAsTrending() {
             if (confirm('Marquer toutes les histoires comme tendances ?')) {
-                stories.forEach(story => story.trending = true);
-                saveStories();
+                stories.forEach(story => {
+                    if (!story.deleted) story.trending = true;
+                });
+                addToHistory('trending_all', 'Toutes les histoires marquées comme tendances');
+                saveData();
                 renderStories();
                 renderAdminStories();
                 updateAdminStats();
@@ -817,12 +1527,20 @@
         function clearAllTrending() {
             if (confirm('Retirer toutes les histoires des tendances ?')) {
                 stories.forEach(story => story.trending = false);
-                saveStories();
+                addToHistory('trending_clear', 'Toutes les tendances supprimées');
+                saveData();
                 renderStories();
                 renderAdminStories();
                 updateAdminStats();
                 showNotification('Toutes les tendances supprimées');
             }
+        }
+
+        function loadAdminSettings() {
+            document.getElementById('autoModeration').checked = adminSettings.autoModeration;
+            document.getElementById('requireApproval').checked = adminSettings.requireApproval;
+            document.getElementById('charLimit').value = adminSettings.charLimit;
+            document.getElementById('dailyLimit').value = adminSettings.dailyLimit;
         }
 
         function saveAdminSettings() {
@@ -832,13 +1550,16 @@
                 charLimit: parseInt(document.getElementById('charLimit').value),
                 dailyLimit: parseInt(document.getElementById('dailyLimit').value)
             };
-            localStorage.setItem('adminSettings', JSON.stringify(adminSettings));
+            addToHistory('settings_save', 'Paramètres administrateur sauvegardés');
+            saveData();
             showNotification('Paramètres sauvegardés');
         }
 
         function exportData() {
             const data = {
                 stories: stories,
+                deletedItems: deletedItems,
+                actionHistory: actionHistory,
                 settings: adminSettings,
                 exportDate: new Date().toISOString()
             };
@@ -849,6 +1570,7 @@
             a.download = `histoires-anonymes-${new Date().toISOString().split('T')[0]}.json`;
             a.click();
             URL.revokeObjectURL(url);
+            addToHistory('export', 'Données exportées');
             showNotification('Données exportées');
         }
 
@@ -868,20 +1590,39 @@
                                     ...story,
                                     timestamp: new Date(story.timestamp)
                                 }));
+                                
+                                if (data.deletedItems) {
+                                    deletedItems = data.deletedItems.map(item => ({
+                                        ...item,
+                                        deletedAt: new Date(item.deletedAt)
+                                    }));
+                                }
+                                
+                                if (data.actionHistory) {
+                                    actionHistory = data.actionHistory.map(action => ({
+                                        ...action,
+                                        timestamp: new Date(action.timestamp)
+                                    }));
+                                }
+                                
                                 if (data.settings) {
                                     adminSettings = data.settings;
-                                    localStorage.setItem('adminSettings', JSON.stringify(adminSettings));
                                 }
-                                saveStories();
+                                
+                                addToHistory('import', 'Données importées');
+                                saveData();
                                 renderStories();
                                 renderAdminStories();
+                                renderAdminComments();
+                                renderTrash();
                                 updateAdminStats();
+                                updateRecentActions();
                                 showNotification('Données importées avec succès');
                             } else {
                                 throw new Error('Format de fichier invalide');
                             }
                         } catch (error) {
-                            showNotification('Erreur lors de l\'importation: ' + error.message);
+                            showNotification('Erreur lors de l\'importation: ' + error.message, 'error');
                         }
                     };
                     reader.readAsText(file);
@@ -890,41 +1631,167 @@
             input.click();
         }
 
-        // Gestionnaires d'événements pour l'admin
-        document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const password = document.getElementById('adminPassword').value;
-            
-            if (password === adminPassword) {
-                isAdmin = true;
-                closeAdminLogin();
-                showAdminInterface();
-                showNotification('Connexion administrateur réussie');
-            } else {
-                showNotification('Mot de passe incorrect');
+        function clearAllData() {
+            if (!isAdmin) {
+                showNotification('Seul l\'administrateur peut effacer toutes les données', 'error');
+                return;
             }
-        });
-
-        document.getElementById('adminSearchInput').addEventListener('input', renderAdminStories);
-        document.getElementById('adminCategoryFilter').addEventListener('change', renderAdminStories);
-
-        // Fermer les modals en cliquant à l'extérieur
-        document.getElementById('adminLoginModal').addEventListener('click', (e) => {
-            if (e.target.id === 'adminLoginModal') {
-                closeAdminLogin();
+            if (confirm('Êtes-vous sûr de vouloir effacer toutes les données ? Cette action est irréversible.')) {
+                stories = [];
+                deletedItems = [];
+                actionHistory = [];
+                localStorage.removeItem('globalStories');
+                localStorage.removeItem('deletedItems');
+                localStorage.removeItem('actionHistory');
+                addToHistory('clear_all', 'Toutes les données effacées');
+                saveData();
+                renderStories();
+                if (!document.getElementById('adminInterface').classList.contains('hidden')) {
+                    renderAdminStories();
+                    renderAdminComments();
+                    renderTrash();
+                    updateAdminStats();
+                    updateRecentActions();
+                }
+                showNotification('Toutes les données ont été effacées');
             }
-        });
+        }
 
-        // Initialisation
+        function resetToDefaults() {
+            if (confirm('Réinitialiser aux valeurs par défaut ? Cela restaurera les histoires d\'exemple.')) {
+                stories = [...defaultStories];
+                deletedItems = [];
+                actionHistory = [];
+                adminSettings = {
+                    autoModeration: false,
+                    requireApproval: false,
+                    charLimit: 1000,
+                    dailyLimit: 5
+                };
+                addToHistory('reset_defaults', 'Réinitialisation aux valeurs par défaut');
+                saveData();
+                renderStories();
+                if (!document.getElementById('adminInterface').classList.contains('hidden')) {
+                    renderAdminStories();
+                    renderAdminComments();
+                    renderTrash();
+                    updateAdminStats();
+                    updateRecentActions();
+                    loadAdminSettings();
+                }
+                showNotification('Réinitialisation effectuée');
+            }
+        }
+
+        // Gestionnaires d'événements
         document.addEventListener('DOMContentLoaded', () => {
-            loadStories();
+            initTheme();
+            loadData();
             
-            // Charger les paramètres admin
-            document.getElementById('autoModeration').checked = adminSettings.autoModeration;
-            document.getElementById('requireApproval').checked = adminSettings.requireApproval;
-            document.getElementById('charLimit').value = adminSettings.charLimit;
-            document.getElementById('dailyLimit').value = adminSettings.dailyLimit;
+            // Sélecteur de thème
+            document.getElementById('themeSelector').addEventListener('change', (e) => {
+                changeTheme(e.target.value);
+            });
+            
+            // Recherche et filtres
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                searchTerm = e.target.value;
+                renderStories();
+            });
+
+            document.getElementById('categoryFilter').addEventListener('change', (e) => {
+                selectedCategory = e.target.value;
+                renderStories();
+            });
+
+            document.getElementById('sortFilter').addEventListener('change', (e) => {
+                sortBy = e.target.value;
+                renderStories();
+            });
+
+            // Compteur de caractères
+            document.getElementById('storyContent').addEventListener('input', (e) => {
+                const charCount = e.target.value.length;
+                document.getElementById('charCount').textContent = charCount;
+                
+                if (charCount > adminSettings.charLimit) {
+                    e.target.value = e.target.value.substring(0, adminSettings.charLimit);
+                    document.getElementById('charCount').textContent = adminSettings.charLimit;
+                }
+            });
+
+            // Formulaire nouvelle histoire
+            document.getElementById('storyForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const title = document.getElementById('storyTitle').value.trim();
+                const content = document.getElementById('storyContent').value.trim();
+                const category = document.getElementById('storyCategory').value;
+                
+                if (title && content) {
+                    const newStory = {
+                        id: Date.now(),
+                        title: title,
+                        content: content,
+                        author: currentUser,
+                        timestamp: new Date(),
+                        likes: 0,
+                        comments: [],
+                        trending: false,
+                        category: category,
+                        liked: false,
+                        deleted: false
+                    };
+                    
+                    stories.unshift(newStory);
+                    addToHistory('story_create', `Nouvelle histoire "${title}" créée`);
+                    saveData();
+                    renderStories();
+                    closeStoryModal();
+                    showNotification('Votre histoire a été publiée !');
+                }
+            });
+
+            // Connexion admin
+            document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const password = document.getElementById('adminPassword').value;
+                
+                if (password === adminPassword) {
+                    isAdmin = true;
+                    closeAdminLogin();
+                    showAdminInterface();
+                    addToHistory('admin_login', 'Connexion administrateur');
+                    showNotification('Connexion administrateur réussie');
+                } else {
+                    showNotification('Mot de passe incorrect', 'error');
+                }
+            });
+
+            // Recherche admin
+            document.getElementById('adminSearchInput').addEventListener('input', renderAdminStories);
+            document.getElementById('adminCategoryFilter').addEventListener('change', renderAdminStories);
+            document.getElementById('adminCommentsSearch').addEventListener('input', renderAdminComments);
+
+            // Fermer les modals en cliquant à l'extérieur
+            document.getElementById('storyModal').addEventListener('click', (e) => {
+                if (e.target.id === 'storyModal') {
+                    closeStoryModal();
+                }
+            });
+
+            document.getElementById('adminLoginModal').addEventListener('click', (e) => {
+                if (e.target.id === 'adminLoginModal') {
+                    closeAdminLogin();
+                }
+            });
+
+            document.getElementById('adminInterface').addEventListener('click', (e) => {
+                if (e.target.id === 'adminInterface') {
+                    closeAdminInterface();
+                }
+            });
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'962c236c104bc7a0',t:'MTc1MzExNjAwOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'962c575af433c7a1',t:'MTc1MzExODEzNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
